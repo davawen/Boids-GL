@@ -10,6 +10,7 @@
 
 #include "shader.hpp"
 #include "shader_program.hpp"
+#include "texture.hpp"
 
 int main()
 {
@@ -95,16 +96,13 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
 
 	// Set up texture
-	unsigned int texture;
-	glGenTextures(1, &texture);
+	gl::Texture texture;
 
-	glBindTexture(GL_TEXTURE_2D, texture);
+	texture.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
+	texture.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	texture.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
 
 	int width, height, nrChannels;
 	uint8_t *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);

@@ -23,9 +23,29 @@ namespace gl
 		link();
 	}
 
+	ShaderProgram::ShaderProgram(ShaderProgram &&other)
+	{
+		id = other.id;
+		other.id = 0;
+	}
+
+	ShaderProgram &ShaderProgram::operator =(ShaderProgram &&other)
+	{
+		if(this != &other)
+		{
+			glDeleteProgram(id); // Free up current program
+
+			id = other.id;
+			other.id = 0;
+		}
+
+		return *this;
+	}
+
 	ShaderProgram::~ShaderProgram()
 	{
 		glDeleteProgram(id);
+		id = 0;
 	}
 
 	unsigned int ShaderProgram::get_id() const

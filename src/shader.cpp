@@ -7,6 +7,25 @@ namespace gl
 		id = glCreateShader(type);
 	}
 
+	Shader::Shader(Shader &&other)
+	{
+		id = other.id;
+		other.id = 0;
+	}
+
+	Shader &Shader::operator =(Shader &&other)
+	{
+		if(this != &other)
+		{
+			glDeleteShader(id); // Free up current program
+
+			id = other.id;
+			other.id = 0;
+		}
+
+		return *this;
+	}
+
 	Shader::~Shader()
 	{
 		glDeleteShader(id);

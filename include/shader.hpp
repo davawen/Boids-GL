@@ -12,6 +12,7 @@ namespace gl
 	private:
 		unsigned int id;
 
+		// Avoid leaking into global namespace and allow convertion to int
 		struct _typeContainer
 		{
 			enum Type
@@ -29,6 +30,13 @@ namespace gl
 		using Type = _typeContainer::Type;
 
 		Shader(Type type);
+
+		// Delete copy initialization
+		Shader(Shader &) = delete;
+		Shader &operator =(Shader &) = delete;
+
+		Shader(Shader &&other);
+		Shader &operator =(Shader &&other);
 
 		// Deletes shader (RAII)
 		~Shader();
