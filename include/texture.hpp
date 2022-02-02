@@ -50,6 +50,7 @@ namespace gl
 		using Parameter = _enumContainer::Parameter;
 
 		Texture();
+		Texture(Target effectiveTarget, GLuint currentBoundTexture = 0);
 		
 		Texture(Texture &) = delete;
 		Texture &operator =(Texture &) = delete;
@@ -71,25 +72,70 @@ namespace gl
 		
 		/// Allocates 1 dimensional immutable storage
 		/// Effective target of the texture must be Target::TEXTURE_1D
-		void storage1D(GLint levels, GLint internalFormat, GLsizei width); 
+		/// @param levels Number of mipmaps
+		/// @param internalFormat Image format to be used by the texture, must be sized. ( GL_RGBA won't work, you have to use GL_RGBA8 )
+		void storage_1D(GLint levels, GLint internalFormat, GLsizei width); 
+
 		/// Allocates 2 dimensional immutable storage
-		/// Effective target of the texture must be one of Target::TEXTURE_2D, Target::TEXTURE_RECTANGLE, Target::TEXTURE_CUBE_MAP or Target::TEXTURE_1D_ARRAY
-		void storage2D(GLint levels, GLint internalFormat, GLsizei width, GLsizei height);
+		/// Effective target of the texture must be one of Target::TEXTURE_2D, Target::TEXTURE_RECTANGLE, Target::TEXTURE_CUBE_MAP or Target::GL_TEXTURE_1D_ARRAY
+		///
+		/// WARNING: THE TEXTURE MUST HAVE BEEN BOUND AT LEAST ONCE FOR AN EFFECTIVE TARGET TO BE DEFINED
+		/// @param levels Number of mipmaps
+		/// @param internalFormat Image format to be used by the texture, must be sized. ( GL_RGBA won't work, you have to use GL_RGBA8 )
+		void storage_2D(GLint levels, GLint internalFormat, GLsizei width, GLsizei height);
+
 		/// Allocates 3 dimensional immutable storage
 		/// Effective target of the texture must be one of Target::TEXTURE_3D, Target::TEXTURE_2D_ARRAY, Target::TEXTURE_CUBE_MAP_ARRAY
-		void storage3D(GLint levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
+		///
+		/// WARNING: THE TEXTURE MUST HAVE BEEN BOUND AT LEAST ONCE FOR AN EFFECTIVE TARGET TO BE DEFINED
+		/// @param levels Number of mipmaps
+		/// @param internalFormat Image format to be used by the texture, must be sized. ( GL_RGBA won't work, you have to use GL_RGBA8 )
+		void storage_3D(GLint levels, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth);
 
 		/// Effective target of the texture must be Target::TEXTURE_2D_MULTISAMPLE
-		void storage2DMultisample( GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations );
+		/// @param internalFormat Image format to be used by the texture, must be sized. ( GL_RGBA won't work, you have to use GL_RGBA8 )
+		void storage_2D_multisample( GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLboolean fixedSampleLocations );
+
 		/// Effective target of the texture must be Target::TEXTURE_2D_MULTISAMPLE_ARRAY
-		void storage3DMultisample( GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations );
+		/// @param internalFormat Image format to be used by the texture, must be sized. ( GL_RGBA won't work, you have to use GL_RGBA8 )
+		void storage_3D_multisample( GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations );
 
 		/// Creates a view on previously-created storage by another texture as this texture's storage
+		/// @param internalFormat Image format to be used by the view. Note that it does not have to be the same one as the original texture, it only has to be compatible with it.
 		/// @param minLevel Specifies the mipmap level in the origTexture that will become the base level of the view texture
 		/// @param numLevels Specifies how many mipmaps are to be viewed
 		/// @param minLayer Used by textures which have layers or faces ( Target::TEXTURE_1D_ARRAY, Target::TEXTURE_2D_ARRAY, Target::TEXTURE_CUBE_MAP, Target::TEXTURE_CUBE_MAP_ARRAY ) similarly to minLevel
 		/// @param numLayers Used by textures which have layers or faces similarly to numLevels
-		void textureView(Target target, const Texture &origTexture, GLint internalFormat, GLuint minLevel, GLuint numLevels, GLuint minLayer, GLuint numLayers);
+		void texture_view(Target target, const Texture &origTexture, GLint internalFormat, GLuint minLevel, GLuint numLevels, GLuint minLayer, GLuint numLayers);
+
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		void subimage_1D(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const GLvoid *data);
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		void subimage_2D(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *data);
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		void subimage_3D(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid *data);
+
+		void generate_mipmap();
+
+		/// Clears the whole texture (mipmap level) to a particular color
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		/// @param data Points to a single pixels worth of data
+		void clear_image(GLint level, GLenum format, GLenum type, const void *data);
+
+		/// Clears a portion of the texture (mipmap level) to a particular color
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		/// @param data Points to a single pixels worth of data
+		void clear_subimage(GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type, const void *data);
+
+		/// Clears a portion of the texture (mipmap level) to a particular color
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		/// @param data Points to a single pixels worth of data
+		void clear_subimage(GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
+
+		/// Clears a portion of the texture (mipmap level) to a particular color
+		/// @param type Integer type of the pixel data (eg: GL_UNSIGNED_BYTE, GL_BYTE, GL_SHORT, ...)
+		/// @param data Points to a single pixels worth of data
+		void clear_subimage(GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *data);
 
 		// void image2D();
 

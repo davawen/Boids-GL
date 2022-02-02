@@ -15,8 +15,8 @@
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL", NULL, NULL);
@@ -96,7 +96,7 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
 
 	// Set up texture
-	gl::Texture texture;
+	gl::Texture texture(gl::Texture::Target::TEXTURE_2D);
 
 	texture.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
 	texture.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
@@ -113,10 +113,10 @@ int main()
 		return -1;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
+	texture.storage_2D(4, GL_RGBA8, width, height);
+	texture.subimage_2D(0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+	texture.generate_mipmap();
 
 	stbi_image_free(data);
 	
@@ -135,7 +135,7 @@ int main()
 
 		shaderProgram.use();
 
-		glBindTexture(GL_TEXTURE_2D, texture);
+		texture.bind(gl::Texture::Target::TEXTURE_2D);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(*indices), GL_UNSIGNED_INT, NULL);
 
