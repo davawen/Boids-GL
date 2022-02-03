@@ -96,31 +96,65 @@ int main()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
 
 	// Set up texture
+	stbi_set_flip_vertically_on_load(true);
+
 	gl::Texture texture(gl::Texture::Target::TEXTURE_2D);
 
 	texture.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
 	texture.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
 
 	texture.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
+	texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_NEAREST);
 
-	int width, height, nrChannels;
-	uint8_t *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);
-
-	if(!data)
 	{
-		std::cout << "Failed to load texture asset.\n";
-		return -1;
+		int width, height, nrChannels;
+		uint8_t *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);
+
+		if(!data)
+		{
+			std::cout << "Failed to load texture asset.\n";
+			return -1;
+		}
+
+		texture.storage_2D(4, GL_RGBA8, width, height);
+		texture.subimage_2D(0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+		texture.generate_mipmap();
+
+		stbi_image_free(data);
 	}
 
-	texture.storage_2D(4, GL_RGBA8, width, height);
-	texture.subimage_2D(0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+	gl::Texture tAwesomeFace{gl::Texture::Target::TEXTURE_2D};
 
-	texture.generate_mipmap();
+	tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
+	tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
 
-	stbi_image_free(data);
+	tAwesomeFace.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	tAwesomeFace.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
+
+	{
+		int width, height, nrChannels;
+		uint8_t *data = stbi_load("assets/awesomeface.png", &width, &height, &nrChannels, 0);
+
+		if(!data)
+		{
+			std::cout << "Failed to load texture asset.\n";
+			return -1;
+		}
+
+		tAwesomeFace.storage_2D(4, GL_RGBA8, width, height);
+		tAwesomeFace.subimage_2D(0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+		tAwesomeFace.generate_mipmap();
+
+		stbi_image_free(data);
+	}
 	
-	gl::ShaderProgram shaderProgram(read_file("assets/basic.vert"), read_file("assets/basic.frag"));
+	gl::ShaderProgram shader(read_file("assets/basic.vert"), read_file("assets/basic.frag"));
+	shader.use(); // Use program before setting uniforms
+
+	shader.set_int("Texture1", 0);
+	shader.set_int("Texture2", 1);
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -133,9 +167,11 @@ int main()
 		glClearColor(.2f, .3f, .3f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		shaderProgram.use();
+		shader.use();
 
-		texture.bind(gl::Texture::Target::TEXTURE_2D);
+		texture.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE0);
+		tAwesomeFace.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE1);
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(*indices), GL_UNSIGNED_INT, NULL);
 

@@ -49,6 +49,12 @@ namespace gl
 		glBindTexture(target, id);
 	}
 
+	void Texture::bind(Target target, GLenum textureUnit) const
+	{
+		glActiveTexture(textureUnit);
+		glBindTexture(target, id);
+	}
+
 	// NOTE: Static function
 	void Texture::unbind(Target target)
 	{

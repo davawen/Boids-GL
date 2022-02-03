@@ -62,7 +62,13 @@ namespace gl
 
 		unsigned int get_id() const;
 
+		/// Binds the texture to the specified target
 		void bind(Target target) const;
+
+		/// Binds the texture to the specified target and to the given texture unit
+		/// @param textureUnit Texture unit starting from GL_TEXTURE0 and going at least to GL_TEXTURE15, but possibly farther
+		void bind(Target target, GLenum textureUnit) const;
+
 		static void unbind(Target target);
 
 		void set_parameter(Parameter pname, GLfloat param);
