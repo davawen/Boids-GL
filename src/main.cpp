@@ -1,16 +1,20 @@
 #include <iostream>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 #include "read_file.hpp"
 
-#include "shader.hpp"
-#include "shader_program.hpp"
-#include "texture.hpp"
+#include "wrap/stb/image.hpp"
+
+#include "wrap/gl/shader.hpp"
+#include "wrap/gl/shader_program.hpp"
+#include "wrap/gl/texture.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 int main()
 {
@@ -106,23 +110,13 @@ int main()
 	texture.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_NEAREST);
 
-	{
-		int width, height, nrChannels;
-		uint8_t *data = stbi_load("assets/container.jpg", &width, &height, &nrChannels, 0);
+	stb::Image image("assets/container.jpg");
 
-		if(!data)
-		{
-			std::cout << "Failed to load texture asset.\n";
-			return -1;
-		}
+	texture.storage_2D(4, GL_RGBA8, image.width, image.height);
+	texture.subimage_2D(0, 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 
-		texture.storage_2D(4, GL_RGBA8, width, height);
-		texture.subimage_2D(0, 0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, data);
+	texture.generate_mipmap();
 
-		texture.generate_mipmap();
-
-		stbi_image_free(data);
-	}
 
 	gl::Texture tAwesomeFace{gl::Texture::Target::TEXTURE_2D};
 
@@ -132,29 +126,20 @@ int main()
 	tAwesomeFace.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	tAwesomeFace.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
 
-	{
-		int width, height, nrChannels;
-		uint8_t *data = stbi_load("assets/awesomeface.png", &width, &height, &nrChannels, 0);
+	image.load("assets/awesomeface.png");
 
-		if(!data)
-		{
-			std::cout << "Failed to load texture asset.\n";
-			return -1;
-		}
+	tAwesomeFace.storage_2D(4, GL_RGBA8, image.width, image.height);
+	tAwesomeFace.subimage_2D(0, 0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 
-		tAwesomeFace.storage_2D(4, GL_RGBA8, width, height);
-		tAwesomeFace.subimage_2D(0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		tAwesomeFace.generate_mipmap();
-
-		stbi_image_free(data);
-	}
+	tAwesomeFace.generate_mipmap();
 	
 	gl::ShaderProgram shader(read_file("assets/basic.vert"), read_file("assets/basic.frag"));
 	shader.use(); // Use program before setting uniforms
 
 	shader.set_int("Texture1", 0);
 	shader.set_int("Texture2", 1);
+
+
 
 	while(!glfwWindowShouldClose(window))
 	{

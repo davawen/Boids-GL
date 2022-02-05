@@ -1,4 +1,4 @@
-#include "shader.hpp"
+#include "wrap/gl/shader.hpp"
 
 namespace gl
 {

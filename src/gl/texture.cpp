@@ -1,4 +1,4 @@
-#include "texture.hpp"
+#include "wrap/gl/texture.hpp"
 
 namespace gl
 {
