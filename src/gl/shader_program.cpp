@@ -75,23 +75,53 @@ namespace gl
 		}
 	}
 
-	void ShaderProgram::use() const
+	void ShaderProgram::use()
 	{
 		glUseProgram(id);
 	}
 
-	void ShaderProgram::set_bool(const std::string &name, bool value) const
+	GLint ShaderProgram::get_uniform(const std::string &name) const
 	{
-		glUniform1i(glGetUniformLocation(id, name.c_str()), (int)value);
+		return glGetUniformLocation(id, name.c_str());
 	}
 
-	void ShaderProgram::set_int(const std::string &name, int value) const
+	void ShaderProgram::set_uniform(const std::string &name, bool value)
 	{
-		glUniform1i(glGetUniformLocation(id, name.c_str()), value);
+		glUniform1i(get_uniform(name), (int)value);
 	}
 
-	void ShaderProgram::set_float(const std::string &name, float value) const
+	void ShaderProgram::set_uniform(GLint location, bool value)
 	{
-		glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+		glUniform1i(location, (int)value);
+	}
+
+	void ShaderProgram::set_uniform(const std::string &name, GLint value)
+	{
+		glUniform1i(get_uniform(name), value);
+	}
+
+	void ShaderProgram::set_uniform(GLint location, GLint value)
+	{
+		glUniform1i(location, value);
+	}
+
+	void ShaderProgram::set_uniform(const std::string &name, GLfloat value)
+	{
+		glUniform1f(get_uniform(name), value);
+	}
+
+	void ShaderProgram::set_uniform(GLint location, GLfloat value)
+	{
+		glUniform1f(location, value);
+	}
+
+	void ShaderProgram::set_uniform(const std::string &name, const glm::mat4 &value)
+	{
+		glUniformMatrix4fv(get_uniform(name), 1, GL_FALSE, glm::value_ptr(value));
+	}
+
+	void ShaderProgram::set_uniform(GLint location, const glm::mat4 &value)
+	{
+		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 }

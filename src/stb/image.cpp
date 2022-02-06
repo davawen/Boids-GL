@@ -20,8 +20,6 @@ namespace stb
 
 	Image::Image(Image &&other)
 	{
-		if(data != nullptr) stbi_image_free(data);
-
 		width = other.width;
 		height = other.height;
 		nrChannels = other.nrChannels;
