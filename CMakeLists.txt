@@ -70,9 +70,6 @@ if(COPY_ASSETS)
 			${CMAKE_CURRENT_BINARY_DIR}/assets/
 	)
 else()
-	message(
-		"ln -sf ${CMAKE_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets"
-	)
 	add_custom_command(
 		OUTPUT
 			${CMAKE_CURRENT_BINARY_DIR}/assets/
@@ -87,7 +84,7 @@ add_dependencies(${PROJECT_NAME} copy_assets)
 
 # Compilation
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	target_compile_options(${PROJECT_NAME} PRIVATE /W4)

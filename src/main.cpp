@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstdlib>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/fwd.hpp>
@@ -19,6 +20,7 @@
 #include "wrap/gl/shader.hpp"
 #include "wrap/gl/shader_program.hpp"
 #include "wrap/gl/texture.hpp"
+#include "wrap/gl/model.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -114,43 +116,53 @@ int main()
 		3, 4, 1
 	};
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
+	// unsigned int VAO;
+	// glGenVertexArrays(1, &VAO);
+	// 
+	// unsigned int VBO;
+	// glGenBuffers(1, &VBO);
 
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
+	// unsigned int EBO;
+	// glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO);
+	// glBindVertexArray(VAO);
 
-	// Copy data to VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// // Copy data to VBO
+	// glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-	const size_t stride = sizeof(float)*5;
+	// const size_t stride = sizeof(float)*5;
 
-	// position (layout = 0)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
-	glEnableVertexAttribArray(0);
+	// // position (layout = 0)
+	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
+	// glEnableVertexAttribArray(0);
 
-	// color (layout = 1)
-	// glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
-	// glEnableVertexAttribArray(1);
+	// // color (layout = 1)
+	// // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
+	// // glEnableVertexAttribArray(1);
 
-	// textures (layout = 2)
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
-	glEnableVertexAttribArray(2);
-	
-	// Copy data to EBO
-	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	// glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// // textures (layout = 2)
+	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
+	// glEnableVertexAttribArray(2);
+	// 
+	// // Copy data to EBO
+	// // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	// // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind VBO
-	glBindVertexArray(0); // unbind VAO
+	// glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind VBO
+	// glBindVertexArray(0); // unbind VAO
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
+	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
+
+	gl::Layout layout({ 
+		{ .index = 0, .size = 3, .type = GL_FLOAT, .stride = sizeof(float)*5, .offset = 0 },
+		{ .index = 2, .size = 2, .type = GL_FLOAT, .stride = sizeof(float)*5, .offset = sizeof(float)*3 }
+	});
+
+	gl::Model model(vertices, 36, 5, GL_STATIC_DRAW, layout);
+
+	// model.set_vertex_attribute(0, 3, GL_FLOAT, sizeof(float)*5, 0);
+	// model.set_vertex_attribute(2, 2, GL_FLOAT, sizeof(float)*5, sizeof(float)*3);
 
 	// Set up texture
 	stbi_set_flip_vertically_on_load(true);
@@ -193,9 +205,11 @@ int main()
 	shader.set_uniform("Texture2", 1);
 
 	glm::vec3 cubePositions[10];
+	glm::vec3 cubeSpeeds[10];
 	for(size_t i = 0; i < 10; i++)
 	{
-		cubePositions[i] = glm::vec3(rand() / (float)RAND_MAX * 10.f - 5.f, rand() / (float)RAND_MAX * 2.f - 1.f,  rand() / (float)RAND_MAX * -5.f);
+		cubePositions[i] = glm::vec3(rand() / (float)RAND_MAX * 10.f - 5.f, rand() / (float)RAND_MAX * 10.f,  rand() / (float)RAND_MAX * -5.f);
+		cubeSpeeds[i] = { rand() / (float)RAND_MAX - .5f, 0.f, rand() / (float)RAND_MAX - .5f };
 	}
 
 	struct Camera
@@ -255,6 +269,13 @@ int main()
 			oldMousePos = mousePos;
 		}
 
+		for(size_t i = 0; i < 10; i++)
+		{
+			cubePositions[i] += cubeSpeeds[i] * deltaTime;
+			cubeSpeeds[i].y -= 9.81f * deltaTime;
+
+			if(cubePositions[i].y < 0.f) cubeSpeeds[i].y *= -1.f;
+		}
 
 		
 
@@ -277,22 +298,22 @@ int main()
 		shader.set_uniform("view", view);
 		shader.set_uniform("projection", projection);
 
-		glBindVertexArray(VAO);
+		model.bind();
 
 		for(size_t i = 0; i < 10; i++)
 		{
-			glm::mat4 model(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, (float)glfwGetTime() + i, glm::normalize(glm::vec3( 1.f, 0.f, 0.f )));
-			// model = glm::scale(model, { 2.f, 2.f, 2.f });
+			glm::mat4 modelMat(1.0f);
+			modelMat = glm::translate(modelMat, cubePositions[i]);
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime() + i, glm::normalize(glm::vec3( 1.f, 0.f, 0.f )));
 
-			shader.set_uniform("model", model);
+			shader.set_uniform("model", modelMat);
 
 			// glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(*indices), GL_UNSIGNED_INT, NULL);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			model.draw(GL_TRIANGLES, 0, 36);
+			
 		}
 
-		glBindVertexArray(0);
+		model.unbind();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
