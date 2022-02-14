@@ -41,6 +41,8 @@ namespace gl
 
 		GLint get_uniform(const std::string &name) const;
 
+		// Uniform overloads
+
 		void set_uniform(const std::string &name, bool value);
 		void set_uniform(GLint location, bool value);
 
@@ -49,6 +51,15 @@ namespace gl
 
 		void set_uniform(const std::string &name, GLfloat value);
 		void set_uniform(GLint location, GLfloat value);
+
+		void set_uniform(const std::string &name, const glm::vec2 &value);
+		void set_uniform(GLint location, const glm::vec2 &value);
+
+		void set_uniform(const std::string &name, const glm::vec3 &value);
+		void set_uniform(GLint location, const glm::vec3 &value);
+
+		void set_uniform(const std::string &name, const glm::vec4 &value);
+		void set_uniform(GLint location, const glm::vec4 &value);
 
 		void set_uniform(const std::string &name, const glm::mat4 &value);
 		void set_uniform(GLint location, const glm::mat4 &value);

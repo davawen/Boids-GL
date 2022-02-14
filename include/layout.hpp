@@ -20,15 +20,16 @@ namespace gl
 			GLuint index; // Used in shader with (location = xxx)
 			GLint size; // Number of components (1, 2, 3 or 4)
 			GLenum type; // Type (GL_INT, GL_FLOAT, GL_BYTE, etc...)
-			GLsizei stride; // Byte offset between consecutive generic vertex attributes
 			size_t offset; // Offset in bytes from the start of vertex attributes
 			GLboolean normalized = GL_FALSE; // See documentation of glVertexAttribPointer
 		};
 
+		GLsizei stride; // Byte offset between consecutive generic vertex attributes
+
 		std::array<std::optional<Attribute>, VERTEX_LAYOUT_SIZE> attributes;
 
 		Layout();
-		Layout(std::initializer_list<Attribute> init)
+		Layout(GLsizei stride, std::initializer_list<Attribute> init)
 		{
 			attributes.fill(std::nullopt);
 
@@ -36,6 +37,8 @@ namespace gl
 			{
 				attributes[it->index] = *it;
 			}
+
+			this->stride = stride;
 		}
 
 		/// Sets the given attribute according to the inputs index, overwriting any previous one before it

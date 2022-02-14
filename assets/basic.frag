@@ -3,6 +3,7 @@
 out vec4 FragColor;
 
 in vec2 TexCoord;
+in vec4 Position;
 
 uniform sampler2D Texture1;
 uniform sampler2D Texture2;

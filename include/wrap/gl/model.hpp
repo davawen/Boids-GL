@@ -33,13 +33,13 @@ namespace gl
 			/// NOTE: All buffers will be unbounded after the constructor.
 			/// @param sizeOfVertex The number of individual elements within a single vertex. For vertices storing xyz positions and uv texture coordinates, that would be 5.
 			/// @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY, GL_STATIC_DRAW, GL_STATIC_READ, GL_STATIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, or GL_DYNAMIC_COPY.
-			Model(GLfloat *vertices, size_t numVertices, size_t sizeOfVertex, GLenum usage, const Layout &layout);	
+			Model(GLfloat *vertices, size_t numVertices, GLenum usage, const Layout &layout);	
 
 			/// Creates a Vertex Buffer, an Index Buffer and a Vertex Array associated with the Model.
 			/// NOTE: All buffers will be unbounded after the constructor.
 			/// @param sizeOfVertex The number of individual elements within a single vertex. For vertices storing xyz positions and uv texture coordinates, that would be 5.
 			/// @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY, GL_STATIC_DRAW, GL_STATIC_READ, GL_STATIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, or GL_DYNAMIC_COPY.
-			Model(GLfloat *vertices, size_t numVertices, size_t sizeOfVertex, GLint *indices, size_t numIndices, GLenum usage, const Layout &layout);
+			Model(GLfloat *vertices, size_t numVertices, GLuint *indices, size_t numIndices, GLenum usage, const Layout &layout);
 
 			Model(const Model &) = delete;
 			Model &operator=(const Model &) = delete;

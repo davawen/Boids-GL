@@ -1,3 +1,4 @@
+#include <vector>
 #include <cmath>
 #include <cstdlib>
 #include <glm/ext/matrix_transform.hpp>
@@ -21,6 +22,7 @@
 #include "wrap/gl/shader_program.hpp"
 #include "wrap/gl/texture.hpp"
 #include "wrap/gl/model.hpp"
+#include "shapes.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -64,6 +66,8 @@ int main()
 	);
 
 	GLfloat vertices[] = {
+// Pos   X      Y      Z      Texture Coordinates
+//       |      |      |      U     V
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
@@ -116,53 +120,26 @@ int main()
 		3, 4, 1
 	};
 
-	// unsigned int VAO;
-	// glGenVertexArrays(1, &VAO);
-	// 
-	// unsigned int VBO;
-	// glGenBuffers(1, &VBO);
-
-	// unsigned int EBO;
-	// glGenBuffers(1, &EBO);
-
-	// glBindVertexArray(VAO);
-
-	// // Copy data to VBO
-	// glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// const size_t stride = sizeof(float)*5;
-
-	// // position (layout = 0)
-	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
-	// glEnableVertexAttribArray(0);
-
-	// // color (layout = 1)
-	// // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
-	// // glEnableVertexAttribArray(1);
-
-	// // textures (layout = 2)
-	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void *)(sizeof(float)*3));
-	// glEnableVertexAttribArray(2);
-	// 
-	// // Copy data to EBO
-	// // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	// // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	// glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind VBO
-	// glBindVertexArray(0); // unbind VAO
-
-	// glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // unbind EBO after VAO
-
-	gl::Layout layout({ 
-		{ .index = 0, .size = 3, .type = GL_FLOAT, .stride = sizeof(float)*5, .offset = 0 },
-		{ .index = 2, .size = 2, .type = GL_FLOAT, .stride = sizeof(float)*5, .offset = sizeof(float)*3 }
+	gl::Layout layout(sizeof(float)*5,
+	{ 
+		{ .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 },
+		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*3 }
 	});
 
-	gl::Model model(vertices, 36, 5, GL_STATIC_DRAW, layout);
+	gl::Model model(vertices, 36, GL_STATIC_DRAW, layout);
 
-	// model.set_vertex_attribute(0, 3, GL_FLOAT, sizeof(float)*5, 0);
-	// model.set_vertex_attribute(2, 2, GL_FLOAT, sizeof(float)*5, sizeof(float)*3);
+	std::vector<GLfloat> coneVertices;
+	std::vector<GLuint> coneIndices;
+
+	shape::generate_unit_cone_positions(coneVertices, coneIndices, layout.stride, 0,
+		[](GLfloat *vertex, size_t index, size_t level, const size_t circlePrecision, const size_t numLevels)
+		{
+			*(vertex + 3) = (float)index / circlePrecision;
+			*(vertex + 4) = (float)level / numLevels;
+		}
+	);
+
+	gl::Model cone(coneVertices.data(), coneVertices.size(), coneIndices.data(), coneIndices.size(), GL_STATIC_DRAW, layout);
 
 	// Set up texture
 	stbi_set_flip_vertically_on_load(true);
@@ -181,7 +158,6 @@ int main()
 	texture.subimage_2D(0, 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 
 	texture.generate_mipmap();
-
 
 	gl::Texture tAwesomeFace{gl::Texture::Target::TEXTURE_2D};
 
@@ -286,19 +262,19 @@ int main()
 
 		shader.use();
 
-		texture.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE0);
-		tAwesomeFace.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE1);
-
 		//glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f), glm::vec3(0.f, 1.f, 0.0f));
 		glm::mat4 view(1.0f);
 		view = glm::lookAt(camera.position, camera.position + camera.orientation, camera.up);
 
 		glm::mat4 projection = glm::perspective(glm::pi<float>()/2.f, 800.f / 600.f, 0.1f, 100.0f);
 
-		shader.set_uniform("view", view);
-		shader.set_uniform("projection", projection);
+		shader.set_uniform("uView", view);
+		shader.set_uniform("uProjection", projection);
 
 		model.bind();
+
+		texture.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE0);
+		tAwesomeFace.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE1);
 
 		for(size_t i = 0; i < 10; i++)
 		{
@@ -306,14 +282,25 @@ int main()
 			modelMat = glm::translate(modelMat, cubePositions[i]);
 			modelMat = glm::rotate(modelMat, (float)glfwGetTime() + i, glm::normalize(glm::vec3( 1.f, 0.f, 0.f )));
 
-			shader.set_uniform("model", modelMat);
+			shader.set_uniform("uModel", modelMat);
 
-			// glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(*indices), GL_UNSIGNED_INT, NULL);
-			model.draw(GL_TRIANGLES, 0, 36);
-			
+			model.draw(GL_TRIANGLES);
 		}
 
 		model.unbind();
+		
+		{
+			float time = glfwGetTime();
+
+			glm::mat4 modelMat(1.0f);
+			modelMat = glm::translate(modelMat, { glm::cos(time) * 10.f, 0.f, glm::sin(time) * 10.f });
+
+			shader.set_uniform("uModel", modelMat);
+
+			cone.bind();
+			cone.draw(GL_TRIANGLES);
+			cone.unbind();
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

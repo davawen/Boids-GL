@@ -2,7 +2,7 @@
 
 namespace gl
 {
-	Model::Model(GLfloat *vertices, size_t numVertices, size_t sizeOfVertex, GLenum usage, const Layout &layout)
+	Model::Model(GLfloat *vertices, size_t numVertices, GLenum usage, const Layout &layout)
 	{
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -14,21 +14,21 @@ namespace gl
 		glBindVertexArray(VAO); // bind()
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeOfVertex * sizeof(GLfloat), vertices, usage);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * layout.stride, vertices, usage);
 
 		for(auto &optAttribute : layout.attributes)
 		{
 			if(!optAttribute.has_value()) continue;
 
 			auto &attribute = optAttribute.value();
-			set_vertex_attribute(attribute.index, attribute.size, attribute.type, attribute.stride, attribute.offset, attribute.normalized);
+			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0); // unbind()
 	}
 
-	Model::Model(GLfloat *vertices, size_t numVertices, size_t sizeOfVertex, GLint *indices, size_t numIndices, GLenum usage, const Layout &layout)
+	Model::Model(GLfloat *vertices, size_t numVertices, GLuint *indices, size_t numIndices, GLenum usage, const Layout &layout)
 	{
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -41,7 +41,7 @@ namespace gl
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeOfVertex * sizeof(GLfloat), vertices, usage);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * layout.stride, vertices, usage);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLint), indices, usage);
 
 		for(auto &optAttribute : layout.attributes)
@@ -49,7 +49,7 @@ namespace gl
 			if(!optAttribute.has_value()) continue;
 
 			auto &attribute = optAttribute.value();
-			set_vertex_attribute(attribute.index, attribute.size, attribute.type, attribute.stride, attribute.offset, attribute.normalized);
+			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
