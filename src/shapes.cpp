@@ -1,9 +1,8 @@
 #include "shapes.hpp"
-#include <cmath>
 
 namespace shape
 {
-	void generate_unit_cone_positions(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices, const size_t stride, const size_t offset, void (*vertexCallback)(GLfloat *, size_t, size_t, const size_t, const size_t), const size_t circlePrecision, const size_t numLevels)
+	void generate_unit_cone(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices, const size_t stride, const size_t positionOffset, const size_t normalOffset, const size_t textureOffset, const size_t circlePrecision, const size_t numLevels)
 	{
 		// Vertex generation
 		const size_t components = stride / sizeof(GLfloat);
@@ -15,18 +14,36 @@ namespace shape
 			for(size_t i = 0; i < circlePrecision; i++)
 			{
 				const size_t vertexIndex = (level * circlePrecision + i) * components;
-				const size_t vertexPositionIndex = vertexIndex + offset/sizeof(GLfloat);
+
+				GLfloat *const vertex = &vertices[vertexIndex];
+				GLfloat *const vPosition = vertex + positionOffset/sizeof(GLfloat);
 
 				float height = (float)level / numLevels;
 
 				// As the height gets bigger, the radius gets smaller
-				vertices[vertexPositionIndex] = glm::cos(i * M_PI * 2.f / (circlePrecision - 1) ) * (1.f - height); // x
-				vertices[vertexPositionIndex + 1] = glm::sin(i * M_PI * 2.f / (circlePrecision - 1) ) * (1.f - height); // y
-				vertices[vertexPositionIndex + 2] = height; // z
+				vPosition[0] = glm::cos(i * M_PI * 2.f / (circlePrecision - 1) ) * (1.f - height); // x
+				vPosition[1] = glm::sin(i * M_PI * 2.f / (circlePrecision - 1) ) * (1.f - height); // y
+				vPosition[2] = height; // z
 
-				if(vertexCallback != nullptr)
+				if(normalOffset != SIZE_MAX)
 				{
-					vertexCallback(&vertices[vertexIndex], i, level, circlePrecision, numLevels);
+					GLfloat *const vNormal = vertex + normalOffset/sizeof(GLfloat);
+
+					// Get vector orthogonal to generator
+					glm::vec3 generator = glm::vec3(-vPosition[0], vPosition[1], 1.0f);
+					glm::vec3 normal = glm::cross(glm::cross(glm::vec3(0.f, 0.f, 1.f), generator), generator);
+
+					normal = glm::normalize(normal);
+
+					vNormal[0] = normal.x;
+					vNormal[1] = normal.y;
+					vNormal[2] = normal.z;
+				}
+
+				if(textureOffset != SIZE_MAX)
+				{
+					vertices[vertexIndex + textureOffset/sizeof(GLfloat)] = (float)i / circlePrecision;
+					vertices[vertexIndex + textureOffset/sizeof(GLfloat) + 1] = height;
 				}
 			}
 		}

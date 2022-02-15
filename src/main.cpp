@@ -66,49 +66,50 @@ int main()
 	);
 
 	GLfloat vertices[] = {
-// Pos   X      Y      Z      Texture Coordinates
-//       |      |      |      U     V
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+// Pos   X      Y      Z      Normals   
+//       |      |      |      X     Y     Z      Texture Coordinates
+//       |      |      |      |     |     |     U     V
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
 
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
 	};
 
 	GLuint indices[] = {
@@ -120,10 +121,11 @@ int main()
 		3, 4, 1
 	};
 
-	gl::Layout layout(sizeof(float)*5,
+	gl::Layout layout(sizeof(float)*8,
 	{ 
-		{ .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 },
-		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*3 }
+		{ .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 }, // Positions (x, y, z)
+		{ .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }, // Normals (x, y, z)
+		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 }  // Textures (u, v)
 	});
 
 	gl::Model model(vertices, 36, GL_STATIC_DRAW, layout);
@@ -131,13 +133,7 @@ int main()
 	std::vector<GLfloat> coneVertices;
 	std::vector<GLuint> coneIndices;
 
-	shape::generate_unit_cone_positions(coneVertices, coneIndices, layout.stride, 0,
-		[](GLfloat *vertex, size_t index, size_t level, const size_t circlePrecision, const size_t numLevels)
-		{
-			*(vertex + 3) = (float)index / circlePrecision;
-			*(vertex + 4) = (float)level / numLevels;
-		}
-	);
+	shape::generate_unit_cone(coneVertices, coneIndices, layout.stride, 0, layout[1]->offset, layout[2]->offset);
 
 	gl::Model cone(coneVertices.data(), coneVertices.size(), coneIndices.data(), coneIndices.size(), GL_STATIC_DRAW, layout);
 
@@ -174,7 +170,7 @@ int main()
 
 	tAwesomeFace.generate_mipmap();
 	
-	gl::ShaderProgram shader(read_file("assets/basic.vert"), read_file("assets/basic.frag"));
+	gl::ShaderProgram shader(read_file("assets/shaders/basic.vert"), read_file("assets/shaders/basic.frag"));
 	shader.use(); // Use program before setting uniforms
 
 	shader.set_uniform("Texture1", 0);
@@ -245,14 +241,6 @@ int main()
 			oldMousePos = mousePos;
 		}
 
-		for(size_t i = 0; i < 10; i++)
-		{
-			cubePositions[i] += cubeSpeeds[i] * deltaTime;
-			cubeSpeeds[i].y -= 9.81f * deltaTime;
-
-			if(cubePositions[i].y < 0.f) cubeSpeeds[i].y *= -1.f;
-		}
-
 		
 
 
@@ -290,10 +278,8 @@ int main()
 		model.unbind();
 		
 		{
-			float time = glfwGetTime();
-
 			glm::mat4 modelMat(1.0f);
-			modelMat = glm::translate(modelMat, { glm::cos(time) * 10.f, 0.f, glm::sin(time) * 10.f });
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f)));
 
 			shader.set_uniform("uModel", modelMat);
 

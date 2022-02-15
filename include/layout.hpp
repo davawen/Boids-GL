@@ -41,6 +41,13 @@ namespace gl
 			this->stride = stride;
 		}
 
+		inline std::optional<Attribute> &operator[](const GLuint index)
+		{
+			if(index >= VERTEX_LAYOUT_SIZE) throw std::out_of_range("Attribute index greater than VertexLayout array size");
+			
+			return attributes[index];
+		}
+
 		/// Sets the given attribute according to the inputs index, overwriting any previous one before it
 		inline void set_attribute(const Attribute &attribute)
 		{
@@ -51,6 +58,8 @@ namespace gl
 
 		inline std::optional<Attribute> remove_attribute(const GLuint index)
 		{
+			if(index >= VERTEX_LAYOUT_SIZE) throw std::out_of_range("Attribute index greater than VertexLayout array size");
+
 			auto attribute = attributes[index];
 
 			attributes[index] = std::nullopt;
