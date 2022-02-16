@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 
+#include "wrap/gl/buffer.hpp"
 #include "layout.hpp"
 
 namespace gl
@@ -10,8 +11,9 @@ namespace gl
 	class Model
 	{
 		private:
-			GLuint VAO, VBO;
-			GLuint EBO; // A value of 0 for EBO means that indices are not used
+			GLuint VAO;
+			VertexBuffer VBO;
+			IndexBuffer EBO; // A value of 0 for EBO means that indices are not used
 
 			size_t numVertices, numIndices;
 
@@ -29,17 +31,17 @@ namespace gl
 			void set_vertex_attribute(GLuint layout, GLint size, GLenum type, GLsizei stride, size_t offset, GLboolean normalized = GL_FALSE);
 
 		public:
-			/// Creates a Vertex Buffer and a Vertex Array associated with the Model.
-			/// NOTE: All buffers will be unbounded after the constructor.
-			/// @param sizeOfVertex The number of individual elements within a single vertex. For vertices storing xyz positions and uv texture coordinates, that would be 5.
-			/// @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY, GL_STATIC_DRAW, GL_STATIC_READ, GL_STATIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, or GL_DYNAMIC_COPY.
-			Model(GLfloat *vertices, size_t numVertices, GLenum usage, const Layout &layout);	
+			/// Creates an empty Vertex Array
+			Model();
 
-			/// Creates a Vertex Buffer, an Index Buffer and a Vertex Array associated with the Model.
-			/// NOTE: All buffers will be unbounded after the constructor.
-			/// @param sizeOfVertex The number of individual elements within a single vertex. For vertices storing xyz positions and uv texture coordinates, that would be 5.
-			/// @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY, GL_STATIC_DRAW, GL_STATIC_READ, GL_STATIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, or GL_DYNAMIC_COPY.
-			Model(GLfloat *vertices, size_t numVertices, GLuint *indices, size_t numIndices, GLenum usage, const Layout &layout);
+			/// Creates a vertex buffer and a vertex array associated with the Model.
+			/// WARNING: Vertex buffer will be move-constructed into the model
+			Model(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout);	
+
+			/// Creates a vertex buffer, an index buffer and a vertex array associated with the Model.
+			/// WARNING: Vertex buffer will be move-constructed into the model
+			/// WARNING: Index buffer will be move-constructed into the model
+			Model(VertexBuffer &vertexBuffer, size_t numVertices, IndexBuffer &indexBuffer, size_t numIndices, const Layout &layout);
 
 			Model(const Model &) = delete;
 			Model &operator=(const Model &) = delete;
@@ -49,6 +51,7 @@ namespace gl
 
 			~Model();
 
+			/// Binds the model's vertex array object
 			void bind();
 			static void unbind();
 
@@ -64,8 +67,18 @@ namespace gl
 			/// @param count Number of vertices/indices to draw
 			void draw(GLenum mode, GLint first, GLsizei count) const;
 
+			/// Changes the model's vertex buffer to the specified one
+			/// WARNING: Vertex buffer is move-constructed into the model
+			/// WARNING: Model must be bound before setting VBO
+			void set_vbo(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout);
+
+			/// Changes the model's index buffer to the specified one
+			/// WARNING: Index buffer is move-constructed into the model
+			/// WARNING: Model must be bound before setting EBO and unbound after it
+			void set_ebo(IndexBuffer &indexBuffer, size_t numIndices);
+
 			GLuint get_vao() const;
-			GLuint get_vbo() const;
-			GLuint get_ebo() const;
+			const VertexBuffer &get_vbo() const;
+			const IndexBuffer &get_ebo() const;
 	};
 }

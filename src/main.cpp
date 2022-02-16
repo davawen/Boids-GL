@@ -128,14 +128,37 @@ int main()
 		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 }  // Textures (u, v)
 	});
 
-	gl::Model model(vertices, 36, GL_STATIC_DRAW, layout);
+	gl::Model model{};
 
-	std::vector<GLfloat> coneVertices;
-	std::vector<GLuint> coneIndices;
+	{
+		auto vertexBuffer = gl::VertexBuffer();
+		vertexBuffer.set_data(vertices, sizeof(vertices), GL_STATIC_DRAW);
 
-	shape::generate_unit_cone(coneVertices, coneIndices, layout.stride, 0, layout[1]->offset, layout[2]->offset);
+		model.bind();
+		model.set_vbo(vertexBuffer, 36, layout);
+		model.unbind();
+	}
 
-	gl::Model cone(coneVertices.data(), coneVertices.size(), coneIndices.data(), coneIndices.size(), GL_STATIC_DRAW, layout);
+	gl::Model cone{};
+
+	{
+		std::vector<GLfloat> coneVertices;
+		std::vector<GLuint> coneIndices;
+
+		shape::generate_unit_cone(coneVertices, coneIndices, layout.stride, 0, layout[1]->offset, layout[2]->offset);
+
+		auto vertexBuffer = gl::VertexBuffer();
+		vertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
+
+		auto indexBuffer = gl::IndexBuffer();
+		indexBuffer.set_data(coneIndices.data(), coneIndices.size()*sizeof(GLuint), GL_STATIC_DRAW);
+
+		cone.bind();
+		cone.set_vbo(vertexBuffer, coneVertices.size(), layout);
+		cone.set_ebo(indexBuffer, coneIndices.size());
+		cone.unbind();
+	}
+
 
 	// Set up texture
 	stbi_set_flip_vertically_on_load(true);

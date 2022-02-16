@@ -1,75 +1,58 @@
 #include "wrap/gl/model.hpp"
+#include "wrap/gl/buffer.hpp"
+#include <utility>
 
 namespace gl
 {
-	Model::Model(GLfloat *vertices, size_t numVertices, GLenum usage, const Layout &layout)
+	Model::Model()
 	{
 		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		EBO = 0;
 
-		this->numVertices = numVertices;
+		VBO = VertexBuffer(0, 0);
+		this->numVertices = 0;
+
+		EBO = IndexBuffer(0, 0);
 		this->numIndices = 0;
-
-		glBindVertexArray(VAO); // bind()
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-		glBufferData(GL_ARRAY_BUFFER, numVertices * layout.stride, vertices, usage);
-
-		for(auto &optAttribute : layout.attributes)
-		{
-			if(!optAttribute.has_value()) continue;
-
-			auto &attribute = optAttribute.value();
-			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
-		}
-
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0); // unbind()
 	}
 
-	Model::Model(GLfloat *vertices, size_t numVertices, GLuint *indices, size_t numIndices, GLenum usage, const Layout &layout)
+	Model::Model(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout)
 	{
 		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
 
-		this->numVertices = numVertices;
-		this->numIndices = numIndices;
+		EBO = IndexBuffer(0, 0);
+		this->numIndices = 0;
 
-		glBindVertexArray(VAO); // bind()
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		bind();
+		
+		set_vbo(vertexBuffer, numVertices, layout);
 
-		glBufferData(GL_ARRAY_BUFFER, numVertices * layout.stride, vertices, usage);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLint), indices, usage);
+		unbind();
+	}
 
-		for(auto &optAttribute : layout.attributes)
-		{
-			if(!optAttribute.has_value()) continue;
+	Model::Model(VertexBuffer &vertexBuffer, size_t numVertices, IndexBuffer &indexBuffer, size_t numIndices, const Layout &layout)
+	{
+		glGenVertexArrays(1, &VAO);
 
-			auto &attribute = optAttribute.value();
-			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
-		}
+		bind();
+		
+		set_vbo(vertexBuffer, numVertices, layout);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0); // unbind()
+		set_ebo(indexBuffer, numIndices);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind index buffer after array buffer to avoid resetting it in the array buffer
+		unbind();
+
 	}
 
 	Model::Model(Model &&other)
 	{
 		VAO = other.VAO;
-		VBO = other.VBO;
-		EBO = other.EBO;
+		VBO = std::move(other.VBO);
+		EBO = std::move(other.EBO);
 
 		numVertices = other.numVertices;
 		numIndices = other.numIndices;
 
 		other.VAO = 0;
-		other.VBO = 0;
-		other.EBO = 0;
 
 		other.numVertices = 0;
 		other.numIndices = 0;
@@ -82,15 +65,13 @@ namespace gl
 			free();
 
 			VAO = other.VAO;
-			VBO = other.VBO;
-			EBO = other.EBO;
+			VBO = std::move(other.VBO);
+			EBO = std::move(other.EBO);
 
 			numVertices = other.numVertices;
 			numIndices = other.numIndices;
 
 			other.VAO = 0;
-			other.VBO = 0;
-			other.EBO = 0;
 
 			other.numVertices = 0;
 			other.numIndices = 0;
@@ -107,8 +88,6 @@ namespace gl
 	void Model::free()
 	{
 		glDeleteVertexArrays(1, &VAO);
-		glDeleteBuffers(1, &VBO);
-		glDeleteBuffers(1, &EBO);
 	}
 
 	void Model::bind()
@@ -127,15 +106,42 @@ namespace gl
 		glEnableVertexAttribArray(layout);
 	}
 
-	void Model::draw(GLenum mode) const {
-		if(EBO == 0) glDrawArrays(mode, 0, numVertices);
+	void Model::draw(GLenum mode) const
+	{
+		if(EBO.get_id() == 0) glDrawArrays(mode, 0, numVertices);
 		else glDrawElements(mode, numIndices, GL_UNSIGNED_INT, nullptr);
 	}
 
 	void Model::draw(GLenum mode, GLint first, GLsizei count) const
 	{
-		if(EBO == 0) glDrawArrays(mode, first, count);
+		if(EBO.get_id() == 0) glDrawArrays(mode, first, count);
 		else glDrawElements(mode, count, GL_UNSIGNED_INT, nullptr);
+	}
+
+	void Model::set_vbo(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout)
+	{
+		VBO = std::move(vertexBuffer);
+		this->numVertices = numVertices;
+
+		VBO.bind();
+
+		for(auto &optAttribute : layout.attributes)
+		{
+			if(!optAttribute.has_value()) continue;
+
+			auto &attribute = optAttribute.value();
+			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
+		}
+
+		VBO.unbind();
+	}
+
+	void Model::set_ebo(IndexBuffer &indexBuffer, size_t numIndices)
+	{
+		EBO = std::move(indexBuffer);
+		this->numIndices = numIndices;
+
+		EBO.bind();
 	}
 
 	GLuint Model::get_vao() const
@@ -143,12 +149,12 @@ namespace gl
 		return VAO;
 	}
 
-	GLuint Model::get_vbo() const
+	const VertexBuffer &Model::get_vbo() const
 	{
 		return VBO;
 	}
 
-	GLuint Model::get_ebo() const
+	const IndexBuffer &Model::get_ebo() const
 	{
 		return EBO;
 	}
