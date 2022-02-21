@@ -12,8 +12,8 @@ namespace gl
 	{
 		private:
 			GLuint VAO;
-			VertexBuffer VBO;
-			IndexBuffer EBO; // A value of 0 for EBO means that indices are not used
+			VertexBuffer *VBO;
+			IndexBuffer *EBO; // A value of 0 for EBO means that indices are not used
 
 			size_t numVertices, numIndices;
 
@@ -34,14 +34,11 @@ namespace gl
 			/// Creates an empty Vertex Array
 			Model();
 
-			/// Creates a vertex buffer and a vertex array associated with the Model.
-			/// WARNING: Vertex buffer will be move-constructed into the model
-			Model(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout);	
+			/// Creates a vertex array and associates it with the given vertex buffer.
+			Model(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout);	
 
-			/// Creates a vertex buffer, an index buffer and a vertex array associated with the Model.
-			/// WARNING: Vertex buffer will be move-constructed into the model
-			/// WARNING: Index buffer will be move-constructed into the model
-			Model(VertexBuffer &vertexBuffer, size_t numVertices, IndexBuffer &indexBuffer, size_t numIndices, const Layout &layout);
+			/// Creates a vertex array and associates it with the given vertex buffer and index buffer.
+			Model(VertexBuffer *vertexBuffer, size_t numVertices, IndexBuffer *indexBuffer, size_t numIndices, const Layout &layout);
 
 			Model(const Model &) = delete;
 			Model &operator=(const Model &) = delete;
@@ -68,14 +65,12 @@ namespace gl
 			void draw(GLenum mode, GLint first, GLsizei count) const;
 
 			/// Changes the model's vertex buffer to the specified one
-			/// WARNING: Vertex buffer is move-constructed into the model
 			/// WARNING: Model must be bound before setting VBO
-			void set_vbo(VertexBuffer &vertexBuffer, size_t numVertices, const Layout &layout);
+			void set_vbo(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout);
 
 			/// Changes the model's index buffer to the specified one
-			/// WARNING: Index buffer is move-constructed into the model
 			/// WARNING: Model must be bound before setting EBO and unbound after it
-			void set_ebo(IndexBuffer &indexBuffer, size_t numIndices);
+			void set_ebo(IndexBuffer *indexBuffer, size_t numIndices);
 
 			GLuint get_vao() const;
 			const VertexBuffer &get_vbo() const;

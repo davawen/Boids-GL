@@ -64,62 +64,13 @@ int main()
 			glViewport(0, 0, width, height);
 		}
 	);
-
-	GLfloat vertices[] = {
-// Pos   X      Y      Z      Normals   
-//       |      |      |      X     Y     Z      Texture Coordinates
-//       |      |      |      |     |     |     U     V
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
-	};
-
-	GLuint indices[] = {
-		0, 1, 2,
-		2, 3, 1,
-		0, 4, 1,
-		0, 4, 2,
-		2, 4, 3,
-		3, 4, 1
-	};
+	
+	glfwSetKeyCallback(window,
+		[](GLFWwindow *window, int key, int, int action, int)
+		{
+			if(key == GLFW_KEY_C && action == GLFW_PRESS) glfwSetInputMode(window, GLFW_CURSOR, glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED );
+		}
+	);
 
 	gl::Layout layout(sizeof(float)*8,
 	{ 
@@ -128,18 +79,70 @@ int main()
 		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 }  // Textures (u, v)
 	});
 
-	gl::Model model{};
+	gl::Model cube{};
+
+	auto cubeVertexBuffer = gl::VertexBuffer();
 
 	{
-		auto vertexBuffer = gl::VertexBuffer();
-		vertexBuffer.set_data(vertices, sizeof(vertices), GL_STATIC_DRAW);
 
-		model.bind();
-		model.set_vbo(vertexBuffer, 36, layout);
-		model.unbind();
+		GLfloat vertices[] = {
+	// Pos   X      Y      Z      Normals   
+	//       |      |      |      X     Y     Z      Texture Coordinates
+	//       |      |      |      |     |     |     U     V
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
+		};
+
+		cubeVertexBuffer.set_data(vertices, sizeof(vertices), GL_STATIC_DRAW);
+
+		cube.bind();
+		cube.set_vbo(&cubeVertexBuffer, 36, layout);
+		cube.unbind();
 	}
 
 	gl::Model cone{};
+
+	auto coneVertexBuffer = gl::VertexBuffer();
+	auto coneIndexBuffer = gl::IndexBuffer();
 
 	{
 		std::vector<GLfloat> coneVertices;
@@ -147,15 +150,13 @@ int main()
 
 		shape::generate_unit_cone(coneVertices, coneIndices, layout.stride, 0, layout[1]->offset, layout[2]->offset);
 
-		auto vertexBuffer = gl::VertexBuffer();
-		vertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
+		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
 
-		auto indexBuffer = gl::IndexBuffer();
-		indexBuffer.set_data(coneIndices.data(), coneIndices.size()*sizeof(GLuint), GL_STATIC_DRAW);
+		coneIndexBuffer.set_data(coneIndices.data(), coneIndices.size()*sizeof(GLuint), GL_STATIC_DRAW);
 
 		cone.bind();
-		cone.set_vbo(vertexBuffer, coneVertices.size(), layout);
-		cone.set_ebo(indexBuffer, coneIndices.size());
+		cone.set_vbo(&coneVertexBuffer, coneVertices.size(), layout);
+		cone.set_ebo(&coneIndexBuffer, coneIndices.size());
 		cone.unbind();
 	}
 
@@ -215,12 +216,19 @@ int main()
 		const glm::vec3 up = { 0.0f, 1.0f, 0.0f };
 	} camera;
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if(glfwRawMouseMotionSupported()) glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 	glm::vec2d oldMousePos;
 	glfwGetCursorPos(window, &oldMousePos.x, &oldMousePos.y);
+
+	{
+		int xpos, ypos;
+		glfwGetWindowPos(window, &xpos, &ypos);
+
+		oldMousePos.x += xpos;
+		oldMousePos.y += ypos;
+	}
 
 	float deltaTime = 0.0f;
 	float lastFrame = 0.0f;
@@ -246,6 +254,13 @@ int main()
 		glm::vec2d mousePos;
 
 		glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
+		{
+			int xpos, ypos;
+			glfwGetWindowPos(window, &xpos, &ypos);
+
+			mousePos.x += xpos;
+			mousePos.y += ypos;
+		}
 
 		//int diffx = (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) - (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
 		glm::vec2 diff = mousePos - oldMousePos;
@@ -282,7 +297,7 @@ int main()
 		shader.set_uniform("uView", view);
 		shader.set_uniform("uProjection", projection);
 
-		model.bind();
+		cube.bind();
 
 		texture.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE0);
 		tAwesomeFace.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE1);
@@ -295,14 +310,14 @@ int main()
 
 			shader.set_uniform("uModel", modelMat);
 
-			model.draw(GL_TRIANGLES);
+			cube.draw(GL_TRIANGLES);
 		}
 
-		model.unbind();
+		cube.unbind();
 		
 		{
 			glm::mat4 modelMat(1.0f);
-			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::normalize(glm::vec3(1.0f, 1.0f, 0.0f)));
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), (glm::vec3(0.0f, 0.0f, 1.0f)));
 
 			shader.set_uniform("uModel", modelMat);
 
