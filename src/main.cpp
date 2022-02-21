@@ -79,12 +79,12 @@ int main()
 		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 }  // Textures (u, v)
 	});
 
-	gl::Model cube{};
+	gl::Model cube;
+	gl::Model lightCube;
 
 	auto cubeVertexBuffer = gl::VertexBuffer();
 
 	{
-
 		GLfloat vertices[] = {
 	// Pos   X      Y      Z      Normals   
 	//       |      |      |      X     Y     Z      Texture Coordinates
@@ -137,9 +137,13 @@ int main()
 		cube.bind();
 		cube.set_vbo(&cubeVertexBuffer, 36, layout);
 		cube.unbind();
+
+		lightCube.bind();
+		lightCube.set_vbo(&cubeVertexBuffer, 36, layout);
+		lightCube.unbind();
 	}
 
-	gl::Model cone{};
+	gl::Model cone;
 
 	auto coneVertexBuffer = gl::VertexBuffer();
 	auto coneIndexBuffer = gl::IndexBuffer();
@@ -160,39 +164,42 @@ int main()
 		cone.unbind();
 	}
 
-
-	// Set up texture
+	// Set up texture parameters and contents
 	stbi_set_flip_vertically_on_load(true);
 
 	gl::Texture texture(gl::Texture::Target::TEXTURE_2D);
 
-	texture.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
-	texture.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
+	{
+		texture.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
+		texture.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
 
-	texture.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_NEAREST);
+		texture.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		texture.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_NEAREST);
 
-	stb::Image image("assets/container.jpg");
+		stb::Image image("assets/container.jpg");
 
-	texture.storage_2D(4, GL_RGBA8, image.width, image.height);
-	texture.subimage_2D(0, 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
+		texture.storage_2D(4, GL_RGBA8, image.width, image.height);
+		texture.subimage_2D(0, 0, 0, image.width, image.height, GL_RGB, GL_UNSIGNED_BYTE, image.data);
 
-	texture.generate_mipmap();
+		texture.generate_mipmap();
+	}
 
 	gl::Texture tAwesomeFace{gl::Texture::Target::TEXTURE_2D};
 
-	tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
-	tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
+	{
+		tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_S, GL_MIRRORED_REPEAT);
+		tAwesomeFace.set_parameter(gl::Texture::Parameter::WRAP_T, GL_MIRRORED_REPEAT);
 
-	tAwesomeFace.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	tAwesomeFace.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
+		tAwesomeFace.set_parameter(gl::Texture::Parameter::MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		tAwesomeFace.set_parameter(gl::Texture::Parameter::MAG_FILTER, GL_LINEAR);
 
-	image.load("assets/awesomeface.png");
+		stb::Image image("assets/awesomeface.png");
 
-	tAwesomeFace.storage_2D(4, GL_RGBA8, image.width, image.height);
-	tAwesomeFace.subimage_2D(0, 0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
+		tAwesomeFace.storage_2D(4, GL_RGBA8, image.width, image.height);
+		tAwesomeFace.subimage_2D(0, 0, 0, image.width, image.height, GL_RGBA, GL_UNSIGNED_BYTE, image.data);
 
-	tAwesomeFace.generate_mipmap();
+		tAwesomeFace.generate_mipmap();
+	}
 	
 	gl::ShaderProgram shader(read_file("assets/shaders/basic.vert"), read_file("assets/shaders/basic.frag"));
 	shader.use(); // Use program before setting uniforms
@@ -200,13 +207,14 @@ int main()
 	shader.set_uniform("Texture1", 0);
 	shader.set_uniform("Texture2", 1);
 
-	glm::vec3 cubePositions[10];
-	glm::vec3 cubeSpeeds[10];
-	for(size_t i = 0; i < 10; i++)
-	{
-		cubePositions[i] = glm::vec3(rand() / (float)RAND_MAX * 10.f - 5.f, rand() / (float)RAND_MAX * 10.f,  rand() / (float)RAND_MAX * -5.f);
-		cubeSpeeds[i] = { rand() / (float)RAND_MAX - .5f, 0.f, rand() / (float)RAND_MAX - .5f };
-	}
+	gl::ShaderProgram lightingShader(read_file("assets/shaders/light.vert"), read_file("assets/shaders/light.frag"));
+
+	lightingShader.use();
+
+	lightingShader.set_uniform("uObjectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+	lightingShader.set_uniform("uLightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+	gl::ShaderProgram lightSourceShader(read_file("assets/shaders/light.vert"), read_file("assets/shaders/white.frag"));
 
 	struct Camera
 	{
@@ -254,6 +262,7 @@ int main()
 		glm::vec2d mousePos;
 
 		glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
+
 		{
 			int xpos, ypos;
 			glfwGetWindowPos(window, &xpos, &ypos);
@@ -279,14 +288,9 @@ int main()
 			oldMousePos = mousePos;
 		}
 
-		
-
-
 		// Rendering
 		glClearColor(.2f, .3f, .3f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		shader.use();
 
 		//glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, -3.0f), glm::vec3(0.0f), glm::vec3(0.f, 1.f, 0.0f));
 		glm::mat4 view(1.0f);
@@ -294,36 +298,47 @@ int main()
 
 		glm::mat4 projection = glm::perspective(glm::pi<float>()/2.f, 800.f / 600.f, 0.1f, 100.0f);
 
-		shader.set_uniform("uView", view);
-		shader.set_uniform("uProjection", projection);
+		// shader.use();
+		// shader.set_uniform("uView", view);
+		// shader.set_uniform("uProjection", projection);
 
-		cube.bind();
+		const glm::vec3 lightPos(1.5f, 1.0f, 2.0f);
+
+		lightingShader.use();
+		lightingShader.set_uniform("uView", view);
+		lightingShader.set_uniform("uProjection", projection);
+		lightingShader.set_uniform("uLightPos", lightPos);
 
 		texture.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE0);
 		tAwesomeFace.bind(gl::Texture::Target::TEXTURE_2D, GL_TEXTURE1);
 
-		for(size_t i = 0; i < 10; i++)
 		{
 			glm::mat4 modelMat(1.0f);
-			modelMat = glm::translate(modelMat, cubePositions[i]);
-			modelMat = glm::rotate(modelMat, (float)glfwGetTime() + i, glm::normalize(glm::vec3( 1.f, 0.f, 0.f )));
+			//modelMat = glm::translate(modelMat, glm::vec3(3.0f, 0.f, -3.0f));
 
-			shader.set_uniform("uModel", modelMat);
+			lightingShader.set_uniform("uModel", modelMat);
+			lightingShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));
 
+			cube.bind();
 			cube.draw(GL_TRIANGLES);
+			cube.unbind();
 		}
 
-		cube.unbind();
+		lightSourceShader.use();
+		lightSourceShader.set_uniform("uView", view);
+		lightSourceShader.set_uniform("uProjection", projection);
 		
 		{
 			glm::mat4 modelMat(1.0f);
-			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), (glm::vec3(0.0f, 0.0f, 1.0f)));
+			modelMat = glm::translate(modelMat, lightPos);
+			modelMat = glm::scale(modelMat, glm::vec3(0.2f));
 
-			shader.set_uniform("uModel", modelMat);
+			lightSourceShader.set_uniform("uModel", modelMat);
+			lightSourceShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));
 
-			cone.bind();
-			cone.draw(GL_TRIANGLES);
-			cone.unbind();
+			lightCube.bind();
+			lightCube.draw(GL_TRIANGLES);
+			lightCube.unbind();
 		}
 
 		glfwSwapBuffers(window);
