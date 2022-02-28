@@ -1,70 +1,87 @@
 #pragma once
 
-#include <array>
-#include <optional>
+#include <vector>
+#include <unordered_map>
 #include <tuple>
 #include <stdexcept>
 
-#include <GL/glew.h>
+#include <GL/gl.h>
 
-#ifndef VERTEX_LAYOUT_SIZE
-	#define VERTEX_LAYOUT_SIZE 16
+// Number of attributes to preemptively reserve
+#ifndef VERTEX_DESCRIPTOR_ALLOC
+	#define VERTEX_DESCRIPTOR_ALLOC 3
 #endif
 
 namespace gl
 {
-	struct Layout
+	size_t get_sizeof_type(GLenum type);
+
+	struct VertexDescriptor
 	{
 		struct Attribute
 		{
 			GLuint index; // Used in shader with (location = xxx)
 			GLint size; // Number of components (1, 2, 3 or 4)
 			GLenum type; // Type (GL_INT, GL_FLOAT, GL_BYTE, etc...)
-			size_t offset; // Offset in bytes from the start of vertex attributes
+			GLsizei offset; // Offset in bytes from the start of the vector
 			GLboolean normalized = GL_FALSE; // See documentation of glVertexAttribPointer
 		};
 
 		GLsizei stride; // Byte offset between consecutive generic vertex attributes
 
-		std::array<std::optional<Attribute>, VERTEX_LAYOUT_SIZE> attributes;
+		std::vector<Attribute> attributes;
 
-		Layout();
-		Layout(GLsizei stride, std::initializer_list<Attribute> init)
+		std::unordered_map<std::string, size_t> namedAttributes;
+
+
+		VertexDescriptor()
 		{
-			attributes.fill(std::nullopt);
+			stride = 0;
+			attributes.reserve(VERTEX_DESCRIPTOR_ALLOC);
+		}
+
+		VertexDescriptor(std::initializer_list<Attribute> init)
+		{
+			stride = 0;
+			attributes.reserve(init.size());
 
 			for(auto it = init.begin(); it != init.end(); it++)
 			{
-				attributes[it->index] = *it;
+				append_attribute(*it);
 			}
-
-			this->stride = stride;
 		}
 
-		inline std::optional<Attribute> &operator[](const GLuint index)
+		inline Attribute &operator[](const GLuint index)
 		{
-			if(index >= VERTEX_LAYOUT_SIZE) throw std::out_of_range("Attribute index greater than VertexLayout array size");
-			
 			return attributes[index];
 		}
 
-		/// Sets the given attribute according to the inputs index, overwriting any previous one before it
-		inline void set_attribute(const Attribute &attribute)
+		inline const Attribute &operator[](const GLuint index) const
 		{
-			if(attribute.index >= VERTEX_LAYOUT_SIZE) throw std::out_of_range("Attribute index greater than VertexLayout array size");
-
-			attributes[attribute.index] = attribute;
+			return attributes[index];
 		}
 
-		inline std::optional<Attribute> remove_attribute(const GLuint index)
+		inline void append_attribute(const Attribute &attribute)
 		{
-			if(index >= VERTEX_LAYOUT_SIZE) throw std::out_of_range("Attribute index greater than VertexLayout array size");
+			attributes.push_back(attribute);
+			this->stride += get_sizeof_type(attribute.type);
+		}
 
-			auto attribute = attributes[index];
+		inline void append_attribute(std::string name, const Attribute &attribute)
+		{
+			attributes.push_back(attribute);
+			this->stride += get_sizeof_type(attribute.type);
+		}
 
-			attributes[index] = std::nullopt;
+		inline void set_attribute(const GLuint index, const Attribute &attribute)
+		{
+			attributes[index] = attribute;
+		}
 
-			return attribute;
+		inline void reset_attributes()
+		{
+			stride = 0;
+			attributes.clear();
 		}
 	};
 }

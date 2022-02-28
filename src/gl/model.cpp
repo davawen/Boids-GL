@@ -15,7 +15,7 @@ namespace gl
 		this->numIndices = 0;
 	}
 
-	Model::Model(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout)
+	Model::Model(VertexBuffer *vertexBuffer, size_t numVertices, const VertexDescriptor &layout)
 	{
 		glGenVertexArrays(1, &VAO);
 
@@ -29,7 +29,7 @@ namespace gl
 		unbind();
 	}
 
-	Model::Model(VertexBuffer *vertexBuffer, size_t numVertices, IndexBuffer *indexBuffer, size_t numIndices, const Layout &layout)
+	Model::Model(VertexBuffer *vertexBuffer, size_t numVertices, IndexBuffer *indexBuffer, size_t numIndices, const VertexDescriptor &layout)
 	{
 		glGenVertexArrays(1, &VAO);
 
@@ -122,7 +122,7 @@ namespace gl
 		else glDrawElements(mode, count, GL_UNSIGNED_INT, nullptr);
 	}
 
-	void Model::set_vbo(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout)
+	void Model::set_vbo(VertexBuffer *vertexBuffer, size_t numVertices, const VertexDescriptor &layout)
 	{
 		VBO = vertexBuffer;
 		this->numVertices = numVertices;

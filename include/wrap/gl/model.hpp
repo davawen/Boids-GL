@@ -35,10 +35,10 @@ namespace gl
 			Model();
 
 			/// Creates a vertex array and associates it with the given vertex buffer.
-			Model(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout);	
+			Model(VertexBuffer *vertexBuffer, size_t numVertices, const VertexDescriptor &layout);	
 
 			/// Creates a vertex array and associates it with the given vertex buffer and index buffer.
-			Model(VertexBuffer *vertexBuffer, size_t numVertices, IndexBuffer *indexBuffer, size_t numIndices, const Layout &layout);
+			Model(VertexBuffer *vertexBuffer, size_t numVertices, IndexBuffer *indexBuffer, size_t numIndices, const VertexDescriptor &layout);
 
 			Model(const Model &) = delete;
 			Model &operator=(const Model &) = delete;
@@ -66,7 +66,7 @@ namespace gl
 
 			/// Changes the model's vertex buffer to the specified one
 			/// WARNING: Model must be bound before setting VBO
-			void set_vbo(VertexBuffer *vertexBuffer, size_t numVertices, const Layout &layout);
+			void set_vbo(VertexBuffer *vertexBuffer, size_t numVertices, const VertexDescriptor &layout);
 
 			/// Changes the model's index buffer to the specified one
 			/// WARNING: Model must be bound before setting EBO and unbound after it

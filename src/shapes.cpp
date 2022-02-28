@@ -2,12 +2,12 @@
 
 namespace shape
 {
-	void generate_unit_cone(std::vector<GLfloat> &vertices, std::vector<GLuint> &indices, const size_t stride, const size_t positionOffset, const size_t normalOffset, const size_t textureOffset, const size_t circlePrecision, const size_t numLevels)
+	MeshData generate_unit_cone(const size_t stride, const size_t positionOffset, const size_t normalOffset, const size_t circlePrecision, const size_t numLevels)
 	{
 		// Vertex generation
 		const size_t components = stride / sizeof(GLfloat);
 		const size_t requiredVertices = circlePrecision * (numLevels + 1) * components;
-		if(vertices.size() < requiredVertices) vertices.resize(requiredVertices);
+		std::vector<GLfloat> vertices(requiredVertices);
 
 		for(size_t level = 0; level <= numLevels; level++)
 		{
@@ -31,7 +31,7 @@ namespace shape
 
 					// Get vector orthogonal to generator
 					glm::vec3 generator = glm::vec3(-vPosition[0], vPosition[1], 1.0f);
-					glm::vec3 normal = glm::cross(glm::cross(glm::vec3(0.f, 0.f, 1.f), generator), generator);
+					glm::vec3 normal = glm::cross(generator, glm::cross(glm::vec3(0.f, 0.f, 1.f), generator));
 
 					normal = glm::normalize(normal);
 
@@ -40,18 +40,18 @@ namespace shape
 					vNormal[2] = normal.z;
 				}
 
-				if(textureOffset != SIZE_MAX)
-				{
-					vertices[vertexIndex + textureOffset/sizeof(GLfloat)] = (float)i / circlePrecision;
-					vertices[vertexIndex + textureOffset/sizeof(GLfloat) + 1] = height;
-				}
+				// if(textureOffset != SIZE_MAX)
+				// {
+				// 	vertices[vertexIndex + textureOffset/sizeof(GLfloat)] = (float)i / circlePrecision;
+				// 	vertices[vertexIndex + textureOffset/sizeof(GLfloat) + 1] = height;
+				// }
 			}
 		}
 
 		// Indice generation
 		// 6 indice per square * number of "squares"
 		const size_t requiredIndices = 6*(circlePrecision - 1)*(numLevels);
-		if(indices.size() < requiredIndices) indices.resize(requiredIndices);
+		std::vector<GLuint> indices(requiredIndices);
 
 		size_t indexNum = 0;
 
@@ -76,5 +76,7 @@ namespace shape
 				indices[indexNum++] = levelIndex + i + 1; // one to the right
 			}
 		}
+
+		return { vertices, indices };
 	}
 }

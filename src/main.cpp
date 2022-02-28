@@ -72,7 +72,7 @@ int main()
 		}
 	);
 
-	gl::Layout layout(sizeof(float)*8,
+	gl::VertexDescriptor layout(sizeof(float)*8,
 	{ 
 		{ .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 }, // Positions (x, y, z)
 		{ .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }, // Normals (x, y, z)
@@ -149,10 +149,7 @@ int main()
 	auto coneIndexBuffer = gl::IndexBuffer();
 
 	{
-		std::vector<GLfloat> coneVertices;
-		std::vector<GLuint> coneIndices;
-
-		shape::generate_unit_cone(coneVertices, coneIndices, layout.stride, 0, layout[1]->offset, layout[2]->offset);
+		auto [coneVertices, coneIndices] = shape::generate_unit_cone(layout.stride, 0, layout[1]->offset, layout[2]->offset);
 
 		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
 
@@ -315,6 +312,7 @@ int main()
 		{
 			glm::mat4 modelMat(1.0f);
 			//modelMat = glm::translate(modelMat, glm::vec3(3.0f, 0.f, -3.0f));
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(0.f, 1.f, 0.f));
 
 			lightingShader.set_uniform("uModel", modelMat);
 			lightingShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));
@@ -322,6 +320,20 @@ int main()
 			cube.bind();
 			cube.draw(GL_TRIANGLES);
 			cube.unbind();
+		}
+
+		{
+			glm::mat4 modelMat(1.0f);
+
+			modelMat = glm::translate(modelMat, glm::vec3(3.0f, 0.f, 0.f));
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(1.f, 0.f, 0.f));
+
+			lightingShader.set_uniform("uModel", modelMat);
+			lightingShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));
+
+			cone.bind();
+			cone.draw(GL_TRIANGLES);
+			cone.unbind();
 		}
 
 		lightSourceShader.use();
