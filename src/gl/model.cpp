@@ -129,11 +129,8 @@ namespace gl
 
 		VBO->bind();
 
-		for(auto &optAttribute : layout.attributes)
+		for(auto &attribute : layout.attributes)
 		{
-			if(!optAttribute.has_value()) continue;
-
-			auto &attribute = optAttribute.value();
 			set_vertex_attribute(attribute.index, attribute.size, attribute.type, layout.stride, attribute.offset, attribute.normalized);
 		}
 

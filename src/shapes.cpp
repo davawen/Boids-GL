@@ -2,10 +2,12 @@
 
 namespace shape
 {
-	MeshData generate_unit_cone(const size_t stride, const size_t positionOffset, const size_t normalOffset, const size_t circlePrecision, const size_t numLevels)
+	MeshData generate_unit_cone(const gl::VertexDescriptor &layout, const size_t circlePrecision, const size_t numLevels)
 	{
+		if(!layout.has_attribute("position")) throw std::invalid_argument("A position attribute is required to generate the cone.");
+
 		// Vertex generation
-		const size_t components = stride / sizeof(GLfloat);
+		const size_t components = layout.stride / sizeof(GLfloat);
 		const size_t requiredVertices = circlePrecision * (numLevels + 1) * components;
 		std::vector<GLfloat> vertices(requiredVertices);
 
@@ -16,7 +18,8 @@ namespace shape
 				const size_t vertexIndex = (level * circlePrecision + i) * components;
 
 				GLfloat *const vertex = &vertices[vertexIndex];
-				GLfloat *const vPosition = vertex + positionOffset/sizeof(GLfloat);
+
+				GLfloat *const vPosition = vertex + layout.get_attribute("position").offset/sizeof(GLfloat);
 
 				float height = (float)level / numLevels;
 
@@ -25,9 +28,10 @@ namespace shape
 				vPosition[1] = glm::sin(i * M_PI * 2.f / (circlePrecision - 1) ) * (1.f - height); // y
 				vPosition[2] = height; // z
 
-				if(normalOffset != SIZE_MAX)
+				if(layout.has_attribute("normal"))
 				{
-					GLfloat *const vNormal = vertex + normalOffset/sizeof(GLfloat);
+					auto &attrNormal = layout.get_attribute("normal");
+					GLfloat *const vNormal = vertex + attrNormal.offset/gl::get_sizeof_type(attrNormal.type);
 
 					// Get vector orthogonal to generator
 					glm::vec3 generator = glm::vec3(-vPosition[0], vPosition[1], 1.0f);
@@ -40,17 +44,20 @@ namespace shape
 					vNormal[2] = normal.z;
 				}
 
-				// if(textureOffset != SIZE_MAX)
-				// {
-				// 	vertices[vertexIndex + textureOffset/sizeof(GLfloat)] = (float)i / circlePrecision;
-				// 	vertices[vertexIndex + textureOffset/sizeof(GLfloat) + 1] = height;
-				// }
+				if(layout.has_attribute("texCoord"))
+				{
+					size_t textureOffset = layout.get_attribute("texCoord").offset/sizeof(GLfloat);
+
+					vertices[vertexIndex + textureOffset] = (float)i / circlePrecision;
+					vertices[vertexIndex + textureOffset + 1] = height;
+				}
 			}
 		}
 
 		// Indice generation
 		// 6 indice per square * number of "squares"
 		const size_t requiredIndices = 6*(circlePrecision - 1)*(numLevels);
+		
 		std::vector<GLuint> indices(requiredIndices);
 
 		size_t indexNum = 0;

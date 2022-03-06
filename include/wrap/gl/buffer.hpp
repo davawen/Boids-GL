@@ -41,10 +41,13 @@ namespace gl
 
 		~Buffer();
 
-		/// Sets the internal data of the buffer.
-		/// @param data Array of data, or nullptr if no data is to be set.
-		/// @param size The size of the array in bytes
-		/// @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be GL_STREAM_DRAW, GL_STREAM_READ, GL_STREAM_COPY, GL_STATIC_DRAW, GL_STATIC_READ, GL_STATIC_COPY, GL_DYNAMIC_DRAW, GL_DYNAMIC_READ, or GL_DYNAMIC_COPY. 
+		/**
+		 * Sets the internal data of the buffer.
+		 *
+		 * @param data Array of data, or nullptr if no data is to be set.
+		 * @param size The size of the array in bytes
+		 * @param usage Specifies the expected usage pattern of the data store. The symbolic constant must be `GL_STREAM_DRAW`, `GL_STREAM_READ`, `GL_STREAM_COPY`, `GL_STATIC_DRAW`, `GL_STATIC_READ`, `GL_STATIC_COPY`, `GL_DYNAMIC_DRAW`, `GL_DYNAMIC_READ`, or `GL_DYNAMIC_COPY`. 
+		 */
 		void set_data(const void *data, GLsizei size, GLenum usage);
 
 		void bind();

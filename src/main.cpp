@@ -72,12 +72,11 @@ int main()
 		}
 	);
 
-	gl::VertexDescriptor layout(sizeof(float)*8,
-	{ 
-		{ .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 }, // Positions (x, y, z)
-		{ .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }, // Normals (x, y, z)
-		{ .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 }  // Textures (u, v)
-	});
+	gl::VertexDescriptor layout;
+
+	layout.append_attribute("position", { .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 }); // Positions (x, y, z)
+	layout.append_attribute("normal", { .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }); // Normals (x, y, z)
+	layout.append_attribute("texCoord", { .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 });  // Textures (u, v)
 
 	gl::Model cube;
 	gl::Model lightCube;
@@ -149,7 +148,7 @@ int main()
 	auto coneIndexBuffer = gl::IndexBuffer();
 
 	{
-		auto [coneVertices, coneIndices] = shape::generate_unit_cone(layout.stride, 0, layout[1]->offset, layout[2]->offset);
+		auto [coneVertices, coneIndices] = shape::generate_unit_cone(layout);
 
 		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
 

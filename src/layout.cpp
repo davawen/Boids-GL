@@ -7,20 +7,16 @@ namespace gl
 		switch(type)
 		{
 			case GL_BYTE:
-				return sizeof(GLbyte);
 			case GL_UNSIGNED_BYTE:
-				return sizeof(GLubyte);
+				return sizeof(GLbyte);
 			case GL_SHORT:
-				return sizeof(GLshort);
 			case GL_UNSIGNED_SHORT:
-				return sizeof(GLushort);
+				return sizeof(GLshort);
 			case GL_INT_2_10_10_10_REV:
 			case GL_INT:
-				return sizeof(GLint);
 			case GL_UNSIGNED_INT_2_10_10_10_REV:
-			case GL_UNSIGNED_INT_10F_11F_11F_REV:
 			case GL_UNSIGNED_INT:
-				return sizeof(GLuint);
+				return sizeof(GLint);
 			case GL_FLOAT:
 				return sizeof(GLfloat);
 			case GL_DOUBLE:

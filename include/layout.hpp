@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <tuple>
 #include <stdexcept>
+#include <optional>
 
 #include <GL/gl.h>
 
@@ -25,13 +26,20 @@ namespace gl
 			GLenum type; // Type (GL_INT, GL_FLOAT, GL_BYTE, etc...)
 			GLsizei offset; // Offset in bytes from the start of the vector
 			GLboolean normalized = GL_FALSE; // See documentation of glVertexAttribPointer
+
+			/// @returns The size of the attributes type times its number of components
+			inline size_t get_size() const
+			{
+				return size*gl::get_sizeof_type(type);
+			}
 		};
 
 		GLsizei stride; // Byte offset between consecutive generic vertex attributes
 
 		std::vector<Attribute> attributes;
 
-		std::unordered_map<std::string, size_t> namedAttributes;
+		/// Used to expose attributes with special meanings, such as positions, texture coordinates, normals, etc...
+		std::unordered_map<std::string, size_t> namedAttributes; 
 
 
 		VertexDescriptor()
@@ -67,10 +75,13 @@ namespace gl
 			this->stride += get_sizeof_type(attribute.type);
 		}
 
-		inline void append_attribute(std::string name, const Attribute &attribute)
+		inline void append_attribute(const std::string &name, const Attribute &attribute)
 		{
 			attributes.push_back(attribute);
-			this->stride += get_sizeof_type(attribute.type);
+			
+			namedAttributes[name] = attributes.size() - 1;
+
+			this->stride += attribute.get_size();
 		}
 
 		inline void set_attribute(const GLuint index, const Attribute &attribute)
@@ -78,10 +89,28 @@ namespace gl
 			attributes[index] = attribute;
 		}
 
+		inline void set_attribute(const GLuint index, const std::string &name, const Attribute &attribute)
+		{
+			attributes[index] = attribute;
+
+			namedAttributes[name] = index;
+		}
+
+		inline bool has_attribute(const std::string &name) const
+		{
+			return namedAttributes.find(name) != namedAttributes.end();
+		}
+
+		inline const Attribute &get_attribute(const std::string &name) const
+		{
+			return attributes[namedAttributes.at(name)];
+		}
+
 		inline void reset_attributes()
 		{
 			stride = 0;
 			attributes.clear();
+			namedAttributes.clear();
 		}
 	};
 }
