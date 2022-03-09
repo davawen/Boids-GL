@@ -26,6 +26,9 @@ namespace shape
 
 	MeshData generate_disk(const gl::VertexDescriptor &layout, const glm::vec3 &normal = { 0.f, 1.f, 0.f }, const float radius = 1.f, const size_t circlePrecision = 24);
 
-	MeshData generate_plane(const size_t stride);
+	MeshData generate_plane(const gl::VertexDescriptor &layout);
+
+	/// @returns Only the vertices, no indices are given
+	std::vector<GLfloat> generate_cube(const gl::VertexDescriptor &layout, float sideLength);
 
 }

@@ -14,14 +14,15 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "read_file.hpp"
-
 #include "wrap/stb/image.hpp"
-
 #include "wrap/gl/shader.hpp"
 #include "wrap/gl/shader_program.hpp"
 #include "wrap/gl/texture.hpp"
 #include "wrap/gl/model.hpp"
+
+#include "engine/event_manager.hpp"
+
+#include "read_file.hpp"
 #include "shapes.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -64,13 +65,8 @@ int main()
 			glViewport(0, 0, width, height);
 		}
 	);
-	
-	glfwSetKeyCallback(window,
-		[](GLFWwindow *window, int key, int, int action, int)
-		{
-			if(key == GLFW_KEY_C && action == GLFW_PRESS) glfwSetInputMode(window, GLFW_CURSOR, glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED );
-		}
-	);
+
+	engine::EventManager eventManager(window);
 
 	gl::VertexDescriptor layout;
 
@@ -230,16 +226,10 @@ int main()
 	glm::vec2d oldMousePos;
 	glfwGetCursorPos(window, &oldMousePos.x, &oldMousePos.y);
 
-	{
-		int xpos, ypos;
-		glfwGetWindowPos(window, &xpos, &ypos);
-
-		oldMousePos.x += xpos;
-		oldMousePos.y += ypos;
-	}
-
 	float deltaTime = 0.0f;
 	float lastFrame = 0.0f;
+
+	engine::Event event;
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -249,7 +239,36 @@ int main()
 			lastFrame = currentFrame;
 		}
 
-		// Logic
+		// Input
+		while(eventManager.poll_event(&event))
+		{
+			using Event = engine::Event;
+
+			switch(event.type)
+			{
+				case Event::KEY_PRESS:
+					if(event.keyboard.key == GLFW_KEY_C) glfwSetInputMode(window, GLFW_CURSOR, glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED );
+					break;
+				case Event::CURSOR_POS:
+				{
+					glm::vec2 diff = event.cursor.pos - oldMousePos;
+
+					camera.directions += glm::vec3(diff.x, -diff.y, 0.f) / 150.f; // world y and viewport y are inverted
+
+					if(camera.directions.y > glm::radians(89.f)) camera.directions.y = glm::radians(89.f);
+					else if(camera.directions.y < glm::radians(-89.f)) camera.directions.y = glm::radians(-89.f);
+
+					camera.orientation.x = glm::cos(camera.directions.x) * glm::cos(camera.directions.y);
+					camera.orientation.y = glm::sin(camera.directions.y);
+					camera.orientation.z = glm::sin(camera.directions.x) * glm::cos(camera.directions.y);
+
+					oldMousePos = event.cursor.pos;
+					break;
+				}
+				default:
+					break;
+			}
+		}
 
 		float cameraSpeed = 2.5f * deltaTime;
 
@@ -259,34 +278,7 @@ int main()
 		if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.position += glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraSpeed;
 		if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.position -= glm::normalize(glm::cross(camera.orientation, camera.up)) * cameraSpeed;
 
-		glm::vec2d mousePos;
-
-		glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
-
-		{
-			int xpos, ypos;
-			glfwGetWindowPos(window, &xpos, &ypos);
-
-			mousePos.x += xpos;
-			mousePos.y += ypos;
-		}
-
-		//int diffx = (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) - (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
-		glm::vec2 diff = mousePos - oldMousePos;
-
-		if(diff.x != 0 || diff.y != 0)
-		{
-			camera.directions += glm::vec3(diff.x, -diff.y, 0.f) / 150.f; // world y and viewport y are inverted
-
-			if(camera.directions.y > glm::radians(89.f)) camera.directions.y = glm::radians(89.f);
-			else if(camera.directions.y < glm::radians(-89.f)) camera.directions.y = glm::radians(-89.f);
-
-			camera.orientation.x = glm::cos(camera.directions.x) * glm::cos(camera.directions.y);
-			camera.orientation.y = glm::sin(camera.directions.y);
-			camera.orientation.z = glm::sin(camera.directions.x) * glm::cos(camera.directions.y);
-
-			oldMousePos = mousePos;
-		}
+		// Logic
 
 		// Rendering
 		glClearColor(.2f, .3f, .3f, 1.f);

@@ -35,7 +35,7 @@ namespace shape
 
 					// Get vector orthogonal to generator
 					glm::vec3 generator = glm::vec3(-vPosition[0], vPosition[1], 1.0f);
-					glm::vec3 normal = glm::cross(-generator, glm::cross(glm::vec3(0.f, 0.f, 1.f), generator));
+					glm::vec3 normal = glm::cross(generator, glm::cross(glm::vec3(0.f, 0.f, 1.f), generator));
 
 					normal = glm::normalize(normal);
 
