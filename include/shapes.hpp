@@ -24,5 +24,8 @@ namespace shape
 	*/
 	MeshData generate_unit_cone(const gl::VertexDescriptor &layout, const size_t circlePrecision = 24, const size_t numLevels = 16);
 
+	MeshData generate_disk(const gl::VertexDescriptor &layout, const glm::vec3 &normal = { 0.f, 1.f, 0.f }, const float radius = 1.f, const size_t circlePrecision = 24);
+
 	MeshData generate_plane(const size_t stride);
+
 }

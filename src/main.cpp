@@ -149,6 +149,10 @@ int main()
 
 	{
 		auto [coneVertices, coneIndices] = shape::generate_unit_cone(layout);
+		auto [diskVertices, diskIndices] = shape::generate_disk(layout, { 0.f, -1.f, 0.f });
+
+		coneVertices.insert(coneVertices.end(), diskVertices.begin(), diskVertices.end());
+		coneIndices.insert(coneIndices.end(), diskIndices.begin(), diskIndices.end());
 
 		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
 
