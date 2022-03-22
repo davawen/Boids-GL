@@ -51,6 +51,9 @@ find_package(GLEW REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE ${GLEW_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${GLEW_LIBRARIES})
 
+find_package(fmt REQUIRED)
+target_link_libraries(${PROJECT_NAME} fmt::fmt)
+
 # Link assets
 if(NOT COPY_ASSETS)
 	set(COPY_ASSETS OFF)

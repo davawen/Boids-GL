@@ -5,6 +5,7 @@
 #include <tuple>
 #include <stdexcept>
 #include <optional>
+#include <fmt/core.h>
 
 #include <GL/gl.h>
 
@@ -24,13 +25,30 @@ namespace gl
 			GLuint index; // Used in shader with (location = xxx)
 			GLint size; // Number of components (1, 2, 3 or 4)
 			GLenum type; // Type (GL_INT, GL_FLOAT, GL_BYTE, etc...)
-			GLsizei offset; // Offset in bytes from the start of the vector
+			GLsizei offset; // Offset in bytes from the start of the vertex
 			GLboolean normalized = GL_FALSE; // See documentation of glVertexAttribPointer
 
-			/// @returns The size of the attributes type times its number of components
+			/// @returns The size of the attribute's type times its number of components
 			inline size_t get_size() const
 			{
 				return size*gl::get_sizeof_type(type);
+			}
+
+			/// Sets the value of this attribute in a given vertex
+			/// @tparam T Struct type of the vertex
+			/// @tparam J Type of the value, size must be equal to the attributes size
+			template <typename VertexType, typename ValueType>
+			inline void set_vertex_value(VertexType &vertex, const ValueType &value) const
+			{
+				// Avoid overridding any data
+				if(sizeof(ValueType) > get_size())
+					throw std::invalid_argument(fmt::format("Value given to set_vertex_value differs in size to gl::VertexDescriptor::Attribute: {} bytes vs {} bytes.", sizeof(ValueType), get_size()));
+
+				// memcpy(static_cast<void *>(static_cast<char *>(&vertex) + offset), static_cast<void *>(&value), get_size());
+
+				// Advances from the start of the vertice's address to the attribute's offset
+				// TODO: Find a more type-safe way of doing this
+				*(ValueType *)((char *)(&vertex) + offset) = value;
 			}
 		};
 

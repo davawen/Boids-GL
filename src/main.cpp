@@ -74,6 +74,8 @@ int main()
 	layout.append_attribute("normal", { .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }); // Normals (x, y, z)
 	layout.append_attribute("texCoord", { .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 });  // Textures (u, v)
 
+	using VertexStruct = std::array<float, 8>;
+
 	gl::Model cube;
 	gl::Model lightCube;
 
@@ -144,10 +146,13 @@ int main()
 	auto coneIndexBuffer = gl::IndexBuffer();
 
 	{
-		auto [coneVertices, coneIndices] = shape::generate_unit_cone(layout);
-		auto [diskVertices, diskIndices] = shape::generate_disk(layout, { 0.f, -1.f, 0.f });
+		auto [coneVertices, coneIndices] = shape::generate_unit_cone<VertexStruct>(layout);
+		auto [diskVertices, diskIndices] = shape::generate_disk<VertexStruct>(layout, { 0.f, 1.f, 0.f });
 
 		coneVertices.insert(coneVertices.end(), diskVertices.begin(), diskVertices.end());
+
+		// Offset indices to the start of the circle's vertices
+		for(auto &index : diskIndices) index += coneVertices.size();
 		coneIndices.insert(coneIndices.end(), diskIndices.begin(), diskIndices.end());
 
 		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
@@ -321,7 +326,7 @@ int main()
 			glm::mat4 modelMat(1.0f);
 
 			modelMat = glm::translate(modelMat, glm::vec3(3.0f, 0.f, 0.f));
-			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(1.f, 0.f, 0.f));
+			// modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(1.f, 0.f, 0.f));
 
 			lightingShader.set_uniform("uModel", modelMat);
 			lightingShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));
