@@ -26,6 +26,11 @@ namespace shape
 	template <typename T>
 	MeshData<T> generate_unit_cone(const gl::VertexDescriptor &layout, const size_t circlePrecision = 24, const size_t numLevels = 16);
 
+	/**
+	 * Generates a 2d disk at a given position and angled towards a given normal.
+	 *
+	 * @param normal *Normalized* direction the disk should be facing
+	*/
 	template <typename T>
 	MeshData<T> generate_disk(const gl::VertexDescriptor &layout, const glm::vec3 &position, const glm::vec3 &normal = { 0.f, 1.f, 0.f }, const float radius = 1.f, const size_t circlePrecision = 24);
 

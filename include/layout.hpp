@@ -77,6 +77,17 @@ namespace gl
 			}
 		}
 
+		VertexDescriptor(std::initializer_list<std::pair<std::string, Attribute>> init)
+		{
+			stride = 0;
+			attributes.reserve(init.size());
+
+			for(auto it = init.begin(); it != init.end(); it++)
+			{
+				append_attribute(it->first, it->second);
+			}
+		}
+
 		inline Attribute &operator[](const GLuint index)
 		{
 			return attributes[index];

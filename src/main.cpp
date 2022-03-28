@@ -1,3 +1,4 @@
+#include <fmt/core.h>
 #include <vector>
 #include <cmath>
 #include <cstdlib>
@@ -21,6 +22,8 @@
 #include "wrap/gl/model.hpp"
 
 #include "engine/event_manager.hpp"
+
+#include "boids/types.hpp"
 
 #include "read_file.hpp"
 #include "shapes.hpp"
@@ -68,13 +71,9 @@ int main()
 
 	engine::EventManager eventManager(window);
 
-	gl::VertexDescriptor layout;
+	gl::VertexDescriptor layout = boids::create_vertex_descriptor();
 
-	layout.append_attribute("position", { .index = 0, .size = 3, .type = GL_FLOAT, .offset = 0 }); // Positions (x, y, z)
-	layout.append_attribute("normal", { .index = 1, .size = 3, .type = GL_FLOAT, .offset = sizeof(float)*3 }); // Normals (x, y, z)
-	layout.append_attribute("texCoord", { .index = 2, .size = 2, .type = GL_FLOAT, .offset = sizeof(float)*6 });  // Textures (u, v)
-
-	using VertexStruct = std::array<float, 8>;
+	using VertexType = boids::Vertex;
 
 	gl::Model cube;
 	gl::Model lightCube;
@@ -82,51 +81,51 @@ int main()
 	auto cubeVertexBuffer = gl::VertexBuffer();
 
 	{
-		GLfloat vertices[] = {
-	// Pos   X      Y      Z      Normals   
-	//       |      |      |      X     Y     Z      Texture Coordinates
-	//       |      |      |      |     |     |     U     V
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f
+		VertexType vertices[] = {
+	//     Pos   X      Y      Z          Normals   
+	//           |      |      |          X     Y     Z           Texture Coordinates
+	//           |      |      |          |     |     |           U     V
+			{ { -0.5f, -0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f } },
+			{ {  0.5f, -0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 1.0f, 0.0f } },
+			{ {  0.5f,  0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f } },
+			{ {  0.5f,  0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 1.0f, 1.0f } },
+			{ { -0.5f,  0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 0.0f, 1.0f } },
+			{ { -0.5f, -0.5f, -0.5f },  { 0.0f,  0.0f, -1.0f }, { 0.0f, 0.0f } },
+                                                                            
+			{ { -0.5f, -0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f } },
+			{ {  0.5f, -0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 1.0f, 0.0f } },
+			{ {  0.5f,  0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f } },
+			{ {  0.5f,  0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 1.0f, 1.0f } },
+			{ { -0.5f,  0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 0.0f, 1.0f } },
+			{ { -0.5f, -0.5f,  0.5f },  { 0.0f,  0.0f,  1.0f }, { 0.0f, 0.0f } },
+                                                                            
+			{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ { -0.5f,  0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f } },
+			{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ { -0.5f, -0.5f, -0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ { -0.5f, -0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f } },
+			{ { -0.5f,  0.5f,  0.5f }, { -1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f } },
+                                                                            
+			{ {  0.5f,  0.5f,  0.5f },  { 1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ {  0.5f,  0.5f, -0.5f },  { 1.0f,  0.0f,  0.0f }, { 1.0f, 1.0f } },
+			{ {  0.5f, -0.5f, -0.5f },  { 1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ {  0.5f, -0.5f, -0.5f },  { 1.0f,  0.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ {  0.5f, -0.5f,  0.5f },  { 1.0f,  0.0f,  0.0f }, { 0.0f, 0.0f } },
+			{ {  0.5f,  0.5f,  0.5f },  { 1.0f,  0.0f,  0.0f }, { 1.0f, 0.0f } },
+                                                                            
+			{ { -0.5f, -0.5f, -0.5f },  { 0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ {  0.5f, -0.5f, -0.5f },  { 0.0f, -1.0f,  0.0f }, { 1.0f, 1.0f } },
+			{ {  0.5f, -0.5f,  0.5f },  { 0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ {  0.5f, -0.5f,  0.5f },  { 0.0f, -1.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ { -0.5f, -0.5f,  0.5f },  { 0.0f, -1.0f,  0.0f }, { 0.0f, 0.0f } },
+			{ { -0.5f, -0.5f, -0.5f },  { 0.0f, -1.0f,  0.0f }, { 0.0f, 1.0f } },
+                                                                            
+			{ { -0.5f,  0.5f, -0.5f },  { 0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f } },
+			{ {  0.5f,  0.5f, -0.5f },  { 0.0f,  1.0f,  0.0f }, { 1.0f, 1.0f } },
+			{ {  0.5f,  0.5f,  0.5f },  { 0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ {  0.5f,  0.5f,  0.5f },  { 0.0f,  1.0f,  0.0f }, { 1.0f, 0.0f } },
+			{ { -0.5f,  0.5f,  0.5f },  { 0.0f,  1.0f,  0.0f }, { 0.0f, 0.0f } },
+			{ { -0.5f,  0.5f, -0.5f },  { 0.0f,  1.0f,  0.0f }, { 0.0f, 1.0f } }
 		};
 
 		cubeVertexBuffer.set_data(vertices, sizeof(vertices), GL_STATIC_DRAW);
@@ -146,16 +145,16 @@ int main()
 	auto coneIndexBuffer = gl::IndexBuffer();
 
 	{
-		auto [coneVertices, coneIndices] = shape::generate_unit_cone<VertexStruct>(layout);
-		auto [diskVertices, diskIndices] = shape::generate_disk<VertexStruct>(layout, { 0.f, 1.f, 0.f });
-
-		coneVertices.insert(coneVertices.end(), diskVertices.begin(), diskVertices.end());
+		auto [coneVertices, coneIndices] = shape::generate_unit_cone<VertexType>(layout);
+		auto [diskVertices, diskIndices] = shape::generate_disk<VertexType>(layout, { 0.f, 0.f, 0.f }, glm::normalize(glm::vec3( 0.f, 0.f, -1.f )));
 
 		// Offset indices to the start of the circle's vertices
 		for(auto &index : diskIndices) index += coneVertices.size();
+
+		coneVertices.insert(coneVertices.end(), diskVertices.begin(), diskVertices.end());
 		coneIndices.insert(coneIndices.end(), diskIndices.begin(), diskIndices.end());
 
-		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(GLfloat), GL_STATIC_DRAW);
+		coneVertexBuffer.set_data(coneVertices.data(), coneVertices.size()*sizeof(coneVertices[0]), GL_STATIC_DRAW);
 
 		coneIndexBuffer.set_data(coneIndices.data(), coneIndices.size()*sizeof(GLuint), GL_STATIC_DRAW);
 
@@ -251,27 +250,27 @@ int main()
 
 			switch(event.type)
 			{
-				case Event::KEY_PRESS:
-					if(event.keyboard.key == GLFW_KEY_C) glfwSetInputMode(window, GLFW_CURSOR, glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED );
-					break;
-				case Event::CURSOR_POS:
-				{
-					glm::vec2 diff = event.cursor.pos - oldMousePos;
+			case Event::KEY_PRESS:
+				if(event.keyboard.key == GLFW_KEY_C) glfwSetInputMode(window, GLFW_CURSOR, glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED );
+				break;
+			case Event::CURSOR_POS:
+			{
+				glm::vec2 diff = event.cursor.pos - oldMousePos;
 
-					camera.directions += glm::vec3(diff.x, -diff.y, 0.f) / 150.f; // world y and viewport y are inverted
+				camera.directions += glm::vec3(diff.x, -diff.y, 0.f) / 150.f; // world y and viewport y are inverted
 
-					if(camera.directions.y > glm::radians(89.f)) camera.directions.y = glm::radians(89.f);
-					else if(camera.directions.y < glm::radians(-89.f)) camera.directions.y = glm::radians(-89.f);
+				if(camera.directions.y > glm::radians(89.f)) camera.directions.y = glm::radians(89.f);
+				else if(camera.directions.y < glm::radians(-89.f)) camera.directions.y = glm::radians(-89.f);
 
-					camera.orientation.x = glm::cos(camera.directions.x) * glm::cos(camera.directions.y);
-					camera.orientation.y = glm::sin(camera.directions.y);
-					camera.orientation.z = glm::sin(camera.directions.x) * glm::cos(camera.directions.y);
+				camera.orientation.x = glm::cos(camera.directions.x) * glm::cos(camera.directions.y);
+				camera.orientation.y = glm::sin(camera.directions.y);
+				camera.orientation.z = glm::sin(camera.directions.x) * glm::cos(camera.directions.y);
 
-					oldMousePos = event.cursor.pos;
-					break;
-				}
-				default:
-					break;
+				oldMousePos = event.cursor.pos;
+				break;
+			}
+			default:
+				break;
 			}
 		}
 
@@ -326,7 +325,7 @@ int main()
 			glm::mat4 modelMat(1.0f);
 
 			modelMat = glm::translate(modelMat, glm::vec3(3.0f, 0.f, 0.f));
-			// modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(1.f, 0.f, 0.f));
+			modelMat = glm::rotate(modelMat, (float)glfwGetTime(), glm::vec3(1.f, 0.f, 0.f));
 
 			lightingShader.set_uniform("uModel", modelMat);
 			lightingShader.set_uniform("uNormal", glm::transpose(glm::inverse(modelMat)));

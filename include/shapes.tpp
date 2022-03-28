@@ -85,6 +85,34 @@ namespace shape
 		return { vertices, indices };
 	};
 
+	/**
+	 * Creates a rotation matrix to align vector v1 to vector v2
+	 *
+	 * @throws When v1 is equal to -v2
+	 */
+	static glm::mat3 rotate_align( glm::vec3 v1, glm::vec3 v2)
+	{
+		if(v1 == -v2) throw std::invalid_argument("rotate_align function is undefined when two vectors are diametrically opposed.");
+
+		glm::vec3 axis = glm::cross( v1, v2 );
+
+		const float cosA = glm::dot( v1, v2 );
+		const float k = 1.0f / (1.0f + cosA);
+
+		glm::mat3 result( (axis.x * axis.x * k) + cosA,
+					 (axis.y * axis.x * k) - axis.z, 
+					 (axis.z * axis.x * k) + axis.y,
+					 (axis.x * axis.y * k) + axis.z,  
+					 (axis.y * axis.y * k) + cosA,      
+					 (axis.z * axis.y * k) - axis.x,
+					 (axis.x * axis.z * k) - axis.y,  
+					 (axis.y * axis.z * k) + axis.x,  
+					 (axis.z * axis.z * k) + cosA 
+					 );
+
+		return result;
+	}
+
 	template <typename T>
 	MeshData<T> generate_disk(const gl::VertexDescriptor &layout, const glm::vec3 &position, const glm::vec3 &normal, const float radius, const size_t circlePrecision)
 	{
@@ -97,15 +125,25 @@ namespace shape
 		auto &positionAttribute = layout.get_attribute("position");
 		positionAttribute.set_vertex_value(vertices[0], position);
 
+		// Rotation matrix to translate the circle's vertices to face the normal
+		glm::mat3 rotationMatrix;
+
+		if(normal == -glm::vec3(0.f, 1.f, 0.f)) rotationMatrix = glm::mat3(1.f); // No action needed
+		else rotationMatrix = rotate_align(glm::vec3(0.f, 1.f, 0.f), normal);
+
 		for(size_t i = 0; i < circlePrecision; i++)
 		{
 			T &currentVertex = vertices[i + 1];
 
-			positionAttribute.set_vertex_value(currentVertex, glm::vec3(
-				glm::cos((float)i / circlePrecision * M_PI) * radius,
+			glm::vec3 vertexPos = glm::vec3(
+				glm::cos((float)i / circlePrecision * M_PI * 2) * radius,
 				0.f,
-				glm::sin((float)i / circlePrecision * M_PI) * radius
-			));
+				glm::sin((float)i / circlePrecision * M_PI * 2) * radius
+			);
+
+			vertexPos = rotationMatrix * vertexPos;
+
+			positionAttribute.set_vertex_value(currentVertex, vertexPos + position);
 
 			if(layout.has_attribute("normal"))
 			{
@@ -125,5 +163,13 @@ namespace shape
 		}
 
 		return { vertices, indices };
+	}
+
+	template <typename T>
+	std::vector<T> generate_cube(const gl::VertexDescriptor &layout, float sideLength)
+	{
+		if(!layout.has_attribute("position")) throw std::invalid_argument("Position attribute requried to generate a cube.");
+
+		std::vector<T> vertices(36);
 	}
 }
